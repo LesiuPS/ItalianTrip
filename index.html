@@ -34,6 +34,18 @@
     .marker-stop { background:#10b981; }
     .timeline-hidden { display:none; }
   </style>
+  <!-- Day galleries & sticky mini map small tweaks -->
+  <style>
+    /* Sticky mini map */
+    #miniMap { position: fixed; bottom: 16px; right: 16px; width: 260px; height: 180px; z-index: 60; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,.25); }
+    #miniMap .leaflet-control-attribution { display:none; }
+    @media (max-width: 1024px){ #miniMap { display:none; } }
+    .photo-strip { display:flex; gap:8px; overflow-x:auto; padding-top:8px; }
+    .photo-strip img { height:84px; width:auto; border-radius:10px; object-fit:cover; flex:0 0 auto; }
+    .comment-card { background:#fff; border:1px solid #e5e7eb; border-radius:14px; padding:16px; box-shadow:0 4px 10px rgba(0,0,0,.04); }
+  </style>
+  <!-- jsPDF for client-side PDF export -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" integrity="sha512-+H3i2Tt2a3w0zV6D6Rz9QZ/1zP6eP6nV1a7qv8m2m8fR3q4x1Yt8KzXvN3mW7yG4O5q1t3+Jk2xQpK7v8Z0GxQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 </head>
 <body class="font-sans bg-gray-50">
   <!-- Navigation -->
@@ -407,6 +419,18 @@
     </div>
   </section>
 
+  <!-- Sticky mini map container -->
+  <div id="miniMap" class="bg-white rounded-xl shadow-lg"></div>
+
+  <!-- Weather floating box -->
+  <div id="weatherBox" class="hidden fixed bottom-16 right-[292px] w-[280px] bg-white/95 backdrop-blur rounded-xl shadow-lg z-50 border border-gray-200">
+    <div class="px-4 py-3 border-b bg-blue-600 text-white rounded-t-xl flex items-center justify-between">
+      <div class="font-semibold"><i class="fas fa-cloud-sun mr-2"></i><span id="weatherTitle">Weather</span></div>
+      <button id="closeWeather" class="text-white/80 hover:text-white"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="p-3 text-sm" id="weatherContent">Select a day to see a 7‑day forecast for that stop.</div>
+  </div>
+
   <!-- Tips (kept) -->
   <section id="tips" class="py-16 bg-white">
     <div class="container mx-auto px-4">
@@ -422,6 +446,24 @@
     </div>
   </section>
 
+  <!-- Comments Section -->
+  <section id="comments" class="py-16 bg-gray-50">
+    <div class="container mx-auto px-4">
+      <h2 class="text-3xl md:text-4xl font-bold text-center mb-10 text-gray-800">Guestbook & Comments</h2>
+      <div class="max-w-3xl mx-auto space-y-6">
+        <div class="comment-card">
+          <div class="grid md:grid-cols-3 gap-3">
+            <input id="cName" type="text" placeholder="Your name" class="md:col-span-1 border rounded-lg px-3 py-2 w-full" />
+            <input id="cPlace" type="text" placeholder="Place or tip (optional)" class="md:col-span-1 border rounded-lg px-3 py-2 w-full" />
+            <button id="cSubmit" class="md:col-span-1 bg-blue-600 hover:bg-blue-700 text-white rounded-lg px-4 py-2 font-medium w-full">Post comment</button>
+          </div>
+          <textarea id="cText" rows="3" placeholder="Share a tip, memory, or must‑see!" class="border rounded-lg px-3 py-2 w-full mt-3"></textarea>
+        </div>
+        <div id="cList" class="space-y-4"></div>
+      </div>
+    </div>
+  </section>
+
   <!-- Countdown -->
   <section class="py-16 bg-blue-600 text-white">
     <div class="container mx-auto px-4 text-center">
@@ -433,6 +475,12 @@
         <div class="bg-white text-blue-600 rounded-lg p-4 w-20 md:w-24"><div class="text-2xl md:text-3xl font-bold" id="seconds">--</div><div class="text-sm">Seconds</div></div>
       </div>
       <p class="mt-8 text-blue-100">We're excited for our journey from Bydgoszcz through Vienna to the beautiful Italian lakes and cities!</p>
+    </div>
+      <div class="mt-8 text-center">
+        <button id="downloadPdf" class="inline-flex items-center gap-2 bg-white text-blue-600 border border-blue-200 hover:bg-blue-50 px-5 py-3 rounded-lg font-medium">
+          <i class="fas fa-file-pdf"></i> Download simplified PDF itinerary
+        </button>
+      </div>
     </div>
   </section>
 
@@ -561,41 +609,4 @@
     }
 
     function bindTimelineInteractions(){
-      const items = document.querySelectorAll('.trip-day');
-      items.forEach((el, idx) => {
-        const day = Number(el.dataset.day || (idx+1));
-        el.dataset.day = String(day);
-        el.addEventListener('mouseenter', () => focusDay(day, { openPopup: false }));
-        el.addEventListener('mouseleave', () => routeLine.setStyle({ weight: 5, opacity: 0.7 }));
-        el.addEventListener('click', () => focusDay(day, { openPopup: true, smooth: true }));
-      });
-    }
-
-    function focusDay(day, opts={}){
-      const m = markers.find(mm => mm._day === day);
-      if(!m) return;
-      routeLine.setStyle({ weight: 6.5, opacity: 0.95 });
-      const latlng = m.getLatLng();
-      map.panTo(latlng, { animate: true, duration: opts.smooth ? 0.6 : 0.3 });
-      if(opts.openPopup) { m.openPopup(); }
-      // highlight timeline item
-      document.querySelectorAll('.trip-day').forEach(el => el.classList.remove('ring-2','ring-blue-400'));
-      const el = document.querySelector(`.trip-day[data-day="${day}"]`);
-      if(el) el.classList.add('ring-2','ring-blue-400');
-    }
-
-    // ===== Show more days =====
-    const showMoreBtn = document.getElementById('showMoreDays');
-    const extra = document.getElementById('extraDays');
-    showMoreBtn.addEventListener('click', () => {
-      extra.classList.toggle('timeline-hidden');
-      showMoreBtn.textContent = extra.classList.contains('timeline-hidden') ? 'Show Full Itinerary' : 'Hide Full Itinerary';
-      // After revealing, re-bind interactions (new nodes present)
-      bindTimelineInteractions();
-    });
-
-    // ===== Initialize map when page loads =====
-    window.addEventListener('load', initMap);
-  </script>
-</body>
-</html>
+      const items = document.querySelecto
