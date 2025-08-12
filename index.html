@@ -44,8 +44,8 @@
     .photo-strip img { height:84px; width:auto; border-radius:10px; object-fit:cover; flex:0 0 auto; }
     .comment-card { background:#fff; border:1px solid #e5e7eb; border-radius:14px; padding:16px; box-shadow:0 4px 10px rgba(0,0,0,.04); }
   </style>
-  <!-- jsPDF for client-side PDF export -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" integrity="sha512-+H3i2Tt2a3w0zV6D6Rz9QZ/1zP6eP6nV1a7qv8m2m8fR3q4x1Yt8KzXvN3mW7yG4O5q1t3+Jk2xQpK7v8Z0GxQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <!-- jsPDF for client-side PDF export (no SRI for wider compatibility) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body class="font-sans bg-gray-50">
   <!-- Navigation -->
@@ -446,6 +446,11 @@
     </div>
   </section>
 
+  <!-- Lightweight alerts -->
+  <div id="appAlerts" class="hidden fixed top-4 left-1/2 -translate-x-1/2 z-[100]">
+    <div class="bg-red-600 text-white px-4 py-2 rounded-lg shadow-lg text-sm" id="appAlertsMsg"></div>
+  </div>
+
   <!-- Comments Section -->
   <section id="comments" class="py-16 bg-gray-50">
     <div class="container mx-auto px-4">
@@ -459,6 +464,7 @@
           </div>
           <textarea id="cText" rows="3" placeholder="Share a tip, memory, or must‑see!" class="border rounded-lg px-3 py-2 w-full mt-3"></textarea>
         </div>
+        <div class="text-xs text-gray-500">Comments are saved only in this browser (localStorage). They won't sync across devices.</div>
         <div id="cList" class="space-y-4"></div>
       </div>
     </div>
@@ -609,4 +615,264 @@
     }
 
     function bindTimelineInteractions(){
-      const items = document.querySelecto
+      const items = document.querySelectorAll('.trip-day');
+      items.forEach((el, idx) => {
+        const day = Number(el.dataset.day || (idx+1));
+        el.dataset.day = String(day);
+        el.addEventListener('mouseenter', () => focusDay(day, { openPopup: false }));
+        el.addEventListener('mouseleave', () => routeLine.setStyle({ weight: 5, opacity: 0.7 }));
+        el.addEventListener('click', () => focusDay(day, { openPopup: true, smooth: true }));
+      });
+    }
+
+    function focusDay(day, opts={}){
+      const m = markers.find(mm => mm._day === day);
+      if(!m) return;
+      routeLine.setStyle({ weight: 6.5, opacity: 0.95 });
+      const latlng = m.getLatLng();
+      map.panTo(latlng, { animate: true, duration: opts.smooth ? 0.6 : 0.3 });
+      if(opts.openPopup) { m.openPopup(); }
+      // highlight timeline item
+      document.querySelectorAll('.trip-day').forEach(el => el.classList.remove('ring-2','ring-blue-400'));
+      const el = document.querySelector(`.trip-day[data-day="${day}"]`);
+      if(el) el.classList.add('ring-2','ring-blue-400');
+    }
+
+    // ===== Show more days =====
+    const showMoreBtn = document.getElementById('showMoreDays');
+    const extra = document.getElementById('extraDays');
+    showMoreBtn.addEventListener('click', () => {
+      extra.classList.toggle('timeline-hidden');
+      showMoreBtn.textContent = extra.classList.contains('timeline-hidden') ? 'Show Full Itinerary' : 'Hide Full Itinerary';
+      // After revealing, re-bind interactions (new nodes present)
+      bindTimelineInteractions();
+    });
+
+    // ===== Initialize map when page loads =====
+    window.addEventListener('load', async () => {
+      // Ensure Leaflet is available; try a fallback CDN if not
+      if (typeof window.L === 'undefined') {
+        await loadScript('https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js');
+        const css = document.createElement('link');
+        css.rel='stylesheet'; css.href='https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css';
+        document.head.appendChild(css);
+      }
+      try { initMap(); initMiniMap(); } catch (e) { alertUser('Map failed to load. Try refreshing, or check your network/CSP.'); }
+      try { initComments(); } catch(e) { console.warn(e); }
+      try { addWeatherButtons(); } catch(e) { console.warn(e); }
+    });
+
+    // ===== MINI MAP (sticky) =====
+    let miniMap, miniRoute, miniMarkerRefs = [];
+    function initMiniMap(){
+      miniMap = L.map('miniMap', { zoomControl:false, attributionControl:false, dragging:true, scrollWheelZoom:false });
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(miniMap);
+      const latlngs = WAYPOINTS.map(w => [w.lat, w.lng]);
+      miniRoute = L.polyline(latlngs, { weight: 3, opacity: 0.7 }).addTo(miniMap);
+      miniMap.fitBounds(miniRoute.getBounds(), { padding: [10,10] });
+      WAYPOINTS.forEach((wp)=>{
+        const icon = L.divIcon({ className:'leaflet-div-icon', html:`<div class='marker-dot marker-day' style='transform:scale(.7)'>${wp.day}</div>`, iconSize:[22,22], iconAnchor:[11,11] });
+        const m = L.marker([wp.lat, wp.lng], { icon }).addTo(miniMap); miniMarkerRefs.push(m);
+      });
+      // Highlight current day when focused
+      const origFocus = focusDay;
+      window.focusDay = function(day, opts){
+        origFocus(day, opts);
+        const m = miniMarkerRefs[day-1]; if(!m) return;
+        miniMap.panTo(m.getLatLng(), { animate:true });
+        // brief pulse
+        const el = document.querySelector(`#miniMap .marker-dot:nth-child(${day})`);
+      }
+    }
+
+    // ===== DAY GALLERIES =====
+    const DAY_PHOTOS = {
+      1: [
+        'https://images.unsplash.com/photo-1543357480-c60d40007a8d?auto=format&fit=crop&w=800&q=60',
+        'https://images.unsplash.com/photo-1555169062-013468b47731?auto=format&fit=crop&w=800&q=60'
+      ],
+      3: [
+        'https://images.unsplash.com/photo-1533105079780-92b9be482077?auto=format&fit=crop&w=800&q=60',
+        'https://images.unsplash.com/photo-1504196606672-aef5c9cefc92?auto=format&fit=crop&w=800&q=60'
+      ],
+      4: [
+        'https://images.unsplash.com/photo-1509023464722-18d996393ca8?auto=format&fit=crop&w=800&q=60',
+        'https://images.unsplash.com/photo-1464790719320-516ecd75af6c?auto=format&fit=crop&w=800&q=60'
+      ],
+      5: [
+        'https://images.unsplash.com/photo-1543348750-466b55f32f34?auto=format&fit=crop&w=800&q=60',
+        'https://images.unsplash.com/photo-1526129318478-62ed807ebdf9?auto=format&fit=crop&w=800&q=60'
+      ],
+      8: [
+        'https://images.unsplash.com/photo-1467269204594-9661b134dd2b?auto=format&fit=crop&w=800&q=60',
+        'https://images.unsplash.com/photo-1528909514045-2fa4ac7a08ba?auto=format&fit=crop&w=800&q=60'
+      ],
+      9: [
+        'https://images.unsplash.com/photo-1512453979798-5ea266f8880c?auto=format&fit=crop&w=800&q=60',
+        'https://images.unsplash.com/photo-1545134969-8debd725b007?auto=format&fit=crop&w=800&q=60'
+      ]
+    };
+
+    function ensureGalleries(){
+      document.querySelectorAll('.trip-day').forEach(dayEl => {
+        const day = Number(dayEl.dataset.day);
+        if(!DAY_PHOTOS[day]) return;
+        if(dayEl.querySelector('.photo-strip')) return; // already
+        const container = document.createElement('div');
+        container.className = 'photo-strip';
+        DAY_PHOTOS[day].forEach(url => {
+          const img = document.createElement('img'); img.loading = 'lazy'; img.src = url; img.alt = 'Photo';
+          container.appendChild(img);
+        });
+        const card = dayEl.querySelector('.bg-white');
+        const toggler = document.createElement('button');
+        toggler.className = 'mt-3 text-sm text-blue-600 hover:text-blue-800 font-medium';
+        toggler.innerHTML = '<i class="fas fa-images mr-1"></i> Show photos';
+        let visible = false;
+        toggler.addEventListener('click', () => {
+          visible = !visible; toggler.textContent = visible ? 'Hide photos' : 'Show photos';
+          container.style.display = visible ? 'flex' : 'none';
+        });
+        container.style.display = 'none';
+        card.appendChild(toggler);
+        card.appendChild(container);
+      });
+    }
+    ensureGalleries();
+
+    // Add small weather buttons to each day card (for mobile visibility)
+    function addWeatherButtons(){
+      document.querySelectorAll('.trip-day').forEach(dayEl => {
+        const day = Number(dayEl.dataset.day);
+        const card = dayEl.querySelector('.bg-white');
+        if (!card || card.querySelector('.weather-btn')) return;
+        const btn = document.createElement('button');
+        btn.className = 'weather-btn ml-2 inline-flex items-center text-xs px-2 py-1 rounded bg-blue-50 text-blue-700 hover:bg-blue-100';
+        btn.innerHTML = '<i class="fas fa-cloud-sun mr-1"></i> Weather';
+        btn.addEventListener('click', (e)=>{ e.stopPropagation(); focusDay(day, { openPopup:false }); });
+        const header = card.querySelector('.flex.justify-between');
+        if(header){ header.appendChild(btn);} else { card.prepend(btn); }
+      });
+    }
+
+    // ===== WEATHER (Open‑Meteo, no API key) =====
+    const weatherBox = document.getElementById('weatherBox');
+    const weatherTitle = document.getElementById('weatherTitle');
+    const weatherContent = document.getElementById('weatherContent');
+    document.getElementById('closeWeather').addEventListener('click', ()=> weatherBox.classList.add('hidden'));
+
+    async function fetchWeatherForDay(day){
+      const wp = WAYPOINTS.find(w=>w.day===day); if(!wp) return;
+      weatherTitle.textContent = `Weather • ${wp.city}`;
+      weatherContent.innerHTML = '<div class="py-4 text-center">Loading forecast…</div>';
+      weatherBox.classList.remove('hidden');
+      try{
+        const url = `https://api.open-meteo.com/v1/forecast?latitude=${wp.lat}&longitude=${wp.lng}&daily=weathercode,temperature_2m_max,temperature_2m_min&timezone=auto`;
+        const res = await fetch(url);
+        const data = await res.json();
+        const days = data.daily.time.map((d,i)=>({
+          date: d,
+          tmax: Math.round(data.daily.temperature_2m_max[i]),
+          tmin: Math.round(data.daily.temperature_2m_min[i]),
+          code: data.daily.weathercode[i]
+        })).slice(0,7);
+        const rows = days.map(x=>`<div class='flex justify-between py-1 border-b last:border-b-0'>
+          <span>${x.date}</span><span class='font-medium'>${x.tmin}° / ${x.tmax}°C</span>
+        </div>`).join('');
+        weatherContent.innerHTML = `<div class='text-xs text-gray-500 mb-1'>7‑day forecast (from today)</div>${rows}`;
+      }catch(e){
+        weatherContent.textContent = 'Could not load weather right now.';
+      }
+    }
+
+    // Hook weather into focusDay (without breaking its behavior)
+    const _origFocusDay = focusDay;
+    focusDay = function(day, opts){
+      _origFocusDay(day, opts);
+      fetchWeatherForDay(day);
+    }
+
+    // ===== COMMENTS (localStorage) =====
+    function initComments(){
+      const key = 'tripComments_v1';
+      const list = document.getElementById('cList');
+      const name = document.getElementById('cName');
+      const place = document.getElementById('cPlace');
+      const text = document.getElementById('cText');
+      const submit = document.getElementById('cSubmit');
+      const read = () => JSON.parse(localStorage.getItem(key) || '[]');
+      const write = arr => localStorage.setItem(key, JSON.stringify(arr));
+
+      function render(){
+        const items = read();
+        if(!items.length){ list.innerHTML = '<p class="text-gray-500 text-center">No comments yet. Be the first to share a tip! ✨</p>'; return; }
+        list.innerHTML = items.map((c,i)=>`
+          <div class='comment-card'>
+            <div class='flex justify-between items-center'>
+              <div class='font-semibold text-gray-800'>${escapeHtml(c.name || 'Guest')}</div>
+              <div class='text-xs text-gray-400'>${new Date(c.time).toLocaleString()}</div>
+            </div>
+            <div class='text-gray-600 mt-2'>${escapeHtml(c.text)}</div>
+            ${c.place ? `<div class='mt-2 text-sm text-blue-600'><i class="fas fa-location-dot mr-1"></i>${escapeHtml(c.place)}</div>` : ''}
+            <div class='mt-3 text-right'>
+              <button data-i='${i}' class='delComment text-xs text-red-600 hover:text-red-700'>Delete</button>
+            </div>
+          </div>
+        `).join('');
+        list.querySelectorAll('.delComment').forEach(btn=> btn.addEventListener('click', (e)=>{
+          const i = Number(e.target.getAttribute('data-i')); const arr = read(); arr.splice(i,1); write(arr); render();
+        }));
+      }
+
+      submit.addEventListener('click', ()=>{
+        if(!text.value.trim()) { text.focus(); return; }
+        const arr = read();
+        arr.unshift({ name: name.value.trim(), place: place.value.trim(), text: text.value.trim(), time: Date.now() });
+        write(arr);
+        name.value = ''; place.value=''; text.value='';
+        render();
+      });
+      render();
+    }
+
+    function escapeHtml(s){ return (s||'').replace(/[&<>"]/g, c=> ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]) ); }
+
+    // ===== PDF EXPORT (simplified itinerary) =====
+    document.getElementById('downloadPdf').addEventListener('click', async ()=>{
+      if (!window.jspdf) {
+        // Fallback loader if CDN blocked on first pass
+        await loadScript('https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js');
+      }
+      if (!window.jspdf) { return alertUser('PDF module failed to load. Are external CDNs blocked?'); }
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF({ unit: 'pt', format: 'a4' });
+      const margin = 40; let y = margin;
+      doc.setFont('helvetica','bold'); doc.setFontSize(18);
+      doc.text('Road Trip 2025 – Bydgoszcz → Italy', margin, y); y += 26;
+      doc.setFont('helvetica',''); doc.setFontSize(12);
+      doc.text('Dates: 11–21 September 2025', margin, y); y += 10;
+      doc.text('Route: Bydgoszcz → Vienna → Lake Garda → Florence → Pisa → Venice → Bydgoszcz', margin, y); y += 20;
+      WAYPOINTS.forEach(wp => {
+        if(y > 780){ doc.addPage(); y = margin; }
+        doc.setFont('helvetica','bold'); doc.text(`Day ${wp.day}: ${wp.title}`, margin, y); y += 14;
+        doc.setFont('helvetica',''); doc.text(`Stop: ${wp.city} — ${wp.note}`, margin, y); y += 18;
+      });
+      doc.save('RoadTrip2025-Itinerary.pdf');
+    });
+    // ===== Utilities =====
+    function loadScript(src){
+      return new Promise((resolve, reject)=>{
+        const s = document.createElement('script'); s.src = src; s.async = true;
+        s.onload = ()=> resolve(); s.onerror = ()=> reject(new Error('Failed to load '+src));
+        document.head.appendChild(s);
+      });
+    }
+    function alertUser(msg){
+      const box = document.getElementById('appAlerts'); const msgEl = document.getElementById('appAlertsMsg');
+      if(!box || !msgEl){ alert(msg); return; }
+      msgEl.textContent = msg; box.classList.remove('hidden');
+      setTimeout(()=> box.classList.add('hidden'), 4000);
+    }
+  </script>
+</body>
+</html>
