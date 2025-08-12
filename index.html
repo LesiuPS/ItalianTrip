@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#047857" />
   <title>Road Trip Adventure - Bydgoszcz to Italy 2025</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
@@ -13,15 +14,15 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <style>
     .map-container { height: 400px; width: 100%; }
-    .trip-day:hover .day-number { transform: scale(1.1); background-color: #3b82f6; }
+    .trip-day:hover .day-number { transform: scale(1.1); background-color: #059669; }
     .parallax { background-attachment: fixed; background-position: center; background-repeat: no-repeat; background-size: cover; }
     @media (max-width: 768px) { .parallax { background-attachment: scroll; } }
     /* Leaflet tweaks */
     .leaflet-container { font: 14px/1.4 system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
     .leaflet-div-icon { background: transparent; border: none; }
     .marker-dot { width: 30px; height: 30px; border-radius: 9999px; display:flex; align-items:center; justify-content:center; font-weight:700; color:white; box-shadow:0 6px 16px rgba(0,0,0,.2); }
-    .marker-day { background:#3b82f6; }
-    .marker-stop { background:#10b981; }
+    .marker-day { background:#059669; } /* emerald-600 */
+    .marker-stop { background:#f43f5e; } /* rose-500 */
     .timeline-hidden { display:none; }
     /* Sticky mini map */
     #miniMap { position: fixed; bottom: 16px; right: 16px; width: 260px; height: 180px; z-index: 60; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,.25); }
@@ -34,39 +35,42 @@
 </head>
 <body class="font-sans bg-gray-50">
   <!-- Navigation -->
-  <nav class="bg-blue-600 text-white sticky top-0 z-50 shadow-lg">
+  <nav class="bg-emerald-700 text-white sticky top-0 z-50 shadow-lg">
     <div class="container mx-auto px-4 py-3 flex justify-between items-center">
       <div class="flex items-center space-x-2"><i class="fas fa-route text-2xl"></i><span class="text-xl font-bold">Road Trip 2025</span></div>
       <div class="hidden md:flex space-x-6">
-        <a href="#overview" class="hover:text-blue-200 transition">Overview</a>
-        <a href="#itinerary" class="hover:text-blue-200 transition">Itinerary</a>
-        <a href="#accommodation" class="hover:text-blue-200 transition">Accommodation</a>
-        <a href="#budget" class="hover:text-blue-200 transition">Budget</a>
-        <a href="#tips" class="hover:text-blue-200 transition">Tips</a>
+        <a href="#overview" class="hover:text-emerald-100 transition">Overview</a>
+        <a href="#itinerary" class="hover:text-emerald-100 transition">Itinerary</a>
+        <a href="#accommodation" class="hover:text-emerald-100 transition">Accommodation</a>
+        <a href="#budget" class="hover:text-emerald-100 transition">Budget</a>
+        <a href="#tips" class="hover:text-emerald-100 transition">Tips</a>
       </div>
       <button class="md:hidden text-2xl" id="menuBtn"><i class="fas fa-bars"></i></button>
     </div>
-    <div class="md:hidden hidden bg-blue-700 py-2" id="mobileMenu">
+    <!-- Italian tricolore accent -->
+    <div class="h-1 w-full bg-gradient-to-r from-emerald-600 via-white to-rose-600"></div>
+    <div class="md:hidden hidden bg-emerald-800 py-2" id="mobileMenu">
       <div class="container mx-auto px-4 flex flex-col space-y-3">
-        <a href="#overview" class="hover:text-blue-200 transition">Overview</a>
-        <a href="#itinerary" class="hover:text-blue-200 transition">Itinerary</a>
-        <a href="#accommodation" class="hover:text-blue-200 transition">Accommodation</a>
-        <a href="#budget" class="hover:text-blue-200 transition">Budget</a>
-        <a href="#tips" class="hover:text-blue-200 transition">Tips</a>
+        <a href="#overview" class="hover:text-emerald-100 transition">Overview</a>
+        <a href="#itinerary" class="hover:text-emerald-100 transition">Itinerary</a>
+        <a href="#accommodation" class="hover:text-emerald-100 transition">Accommodation</a>
+        <a href="#budget" class="hover:text-emerald-100 transition">Budget</a>
+        <a href="#tips" class="hover:text-emerald-100 transition">Tips</a>
       </div>
     </div>
   </nav>
 
   <!-- Hero -->
-  <header class="relative h-screen flex items-center justify-center text-white overflow-hidden">
-    <div class="absolute inset-0 bg-black opacity-50"></div>
-    <div class="parallax bg-[url('https://images.unsplash.com/photo-1503917988258-f87a78e3c995?auto=format&fit=crop&w=2070&q=80')] bg-center bg-cover w-full h-full"></div>
+  <header class="relative h-[80vh] md:h-screen flex items-center justify-center text-white overflow-hidden">
+    <div class="absolute inset-0 bg-gradient-to-b from-black/50 via-black/40 to-black/60"></div>
+    <!-- Changed to an Italian photo (Venice) -->
+    <div class="parallax bg-[url('https://images.unsplash.com/photo-1467269204594-9661b134dd2b?auto=format&fit=crop&w=2070&q=80')] bg-center bg-cover w-full h-full"></div>
     <div class="relative z-10 text-center px-4">
-      <h1 class="text-4xl md:text-6xl font-bold mb-4">European Road Trip</h1>
-      <p class="text-xl md:text-2xl mb-8">Bydgoszcz to Italy • 11-21 September 2025</p>
+      <h1 class="text-4xl md:text-6xl font-bold mb-4">Italian Road Trip</h1>
+      <p class="text-xl md:text-2xl mb-8">Bydgoszcz → Vienna → Garda → Florence → Pisa → Venice</p>
       <div class="flex flex-wrap justify-center gap-4">
-        <a href="#itinerary" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition transform hover:scale-105">View Itinerary</a>
-        <a href="#budget" class="bg-white hover:bg-gray-100 text-blue-600 px-6 py-3 rounded-lg font-medium transition transform hover:scale-105">Budget Details</a>
+        <a href="#itinerary" class="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-3 rounded-lg font-medium transition transform hover:scale-105">View Itinerary</a>
+        <a href="#budget" class="bg-white hover:bg-gray-100 text-emerald-700 px-6 py-3 rounded-lg font-medium transition transform hover:scale-105">Budget Details</a>
       </div>
     </div>
   </header>
@@ -77,26 +81,26 @@
       <h2 class="text-3xl md:text-4xl font-bold text-center mb-12 text-gray-800">Trip Overview</h2>
       <div class="grid md:grid-cols-3 gap-8">
         <div class="bg-gray-50 p-6 rounded-xl shadow-md hover:shadow-lg transition">
-          <div class="text-blue-600 text-4xl mb-4"><i class="fas fa-route"></i></div>
+          <div class="text-emerald-600 text-4xl mb-4"><i class="fas fa-route"></i></div>
           <h3 class="text-xl font-semibold mb-2 text-gray-800">Route</h3>
           <p class="text-gray-600">Bydgoszcz → Vienna → Lake Garda → Florence → Pisa → Venice → Bydgoszcz</p>
           <p class="mt-4 text-gray-500"><i class="fas fa-road mr-2"></i>Total distance: ~3,500 km</p>
         </div>
         <div class="bg-gray-50 p-6 rounded-xl shadow-md hover:shadow-lg transition">
-          <div class="text-blue-600 text-4xl mb-4"><i class="fas fa-calendar-alt"></i></div>
+          <div class="text-emerald-600 text-4xl mb-4"><i class="fas fa-calendar-alt"></i></div>
           <h3 class="text-xl font-semibold mb-2 text-gray-800">Dates</h3>
           <p class="text-gray-600">11-21 September 2025</p>
           <p class="mt-4 text-gray-500"><i class="fas fa-moon mr-2"></i>11 days / 10 nights</p>
         </div>
         <div class="bg-gray-50 p-6 rounded-xl shadow-md hover:shadow-lg transition">
-          <div class="text-blue-600 text-4xl mb-4"><i class="fas fa-users"></i></div>
+          <div class="text-emerald-600 text-4xl mb-4"><i class="fas fa-users"></i></div>
           <h3 class="text-xl font-semibold mb-2 text-gray-800">Travelers</h3>
           <p class="text-gray-600">4 friends by car</p>
           <p class="mt-4 text-gray-500"><i class="fas fa-car mr-2"></i>1 vehicle</p>
         </div>
       </div>
       <div class="mt-16 bg-gray-100 rounded-xl overflow-hidden shadow-lg">
-        <div class="p-4 bg-blue-600 text-white"><h3 class="text-xl font-semibold"><i class="fas fa-map-marked-alt mr-2"></i>Trip Map</h3></div>
+        <div class="p-4 bg-emerald-700 text-white"><h3 class="text-xl font-semibold"><i class="fas fa-map-marked-alt mr-2"></i>Trip Map</h3></div>
         <div class="map-container" id="map"><div class="h-full flex items-center justify-center bg-gray-200"><p class="text-gray-500">Interactive map loading...</p></div></div>
       </div>
     </div>
@@ -107,11 +111,11 @@
     <div class="container mx-auto px-4">
       <h2 class="text-3xl md:text-4xl font-bold text-center mb-12 text-gray-800">Day-by-Day Itinerary</h2>
       <div class="relative">
-        <div class="hidden md:block absolute left-1/2 h-full w-1 bg-blue-400 transform -translate-x-1/2"></div>
+        <div class="hidden md:block absolute left-1/2 h-full w-1 bg-emerald-400 transform -translate-x-1/2"></div>
         <div id="timeline" class="space-y-8">
-          <!-- Days 1–5 -->
+          <!-- Days 1–5 (unchanged content; colors updated) -->
           <div class="trip-day relative flex flex-col md:flex-row items-center" data-day="1">
-            <div class="day-number w-16 h-16 bg-blue-500 text-white rounded-full flex items-center justify-center text-xl font-bold mb-4 md:mb-0">1</div>
+            <div class="day-number w-16 h-16 bg-emerald-500 text-white rounded-full flex items-center justify-center text-xl font-bold mb-4 md:mb-0">1</div>
             <div class="md:ml-8 w-full">
               <div class="bg-white p-6 rounded-xl shadow-md hover:shadow-lg transition">
                 <div class="flex justify-between items-start">
@@ -119,18 +123,18 @@
                     <h3 class="text-xl font-semibold text-gray-800">Bydgoszcz → Vienna</h3>
                     <p class="text-gray-500">Thursday, 11 September 2025</p>
                   </div>
-                  <span class="bg-blue-100 text-blue-800 text-sm px-3 py-1 rounded-full">Travel Day</span>
+                  <span class="bg-emerald-100 text-emerald-800 text-sm px-3 py-1 rounded-full">Travel Day</span>
                 </div>
                 <div class="mt-4 text-gray-600">
-                  <p><i class="fas fa-clock mr-2 text-blue-500"></i>~8-9 hours drive</p>
-                  <p><i class="fas fa-map-marker-alt mr-2 text-blue-500"></i>Evening walk in the city center</p>
-                  <p><i class="fas fa-bed mr-2 text-blue-500"></i>Overnight: Vienna</p>
+                  <p><i class="fas fa-clock mr-2 text-emerald-600"></i>~8-9 hours drive</p>
+                  <p><i class="fas fa-map-marker-alt mr-2 text-emerald-600"></i>Evening walk in the city center</p>
+                  <p><i class="fas fa-bed mr-2 text-emerald-600"></i>Overnight: Vienna</p>
                 </div>
               </div>
             </div>
           </div>
           <div class="trip-day relative flex flex-col md:flex-row items-center" data-day="2">
-            <div class="day-number w-16 h-16 bg-blue-500 text-white rounded-full flex items-center justify-center text-xl font-bold mb-4 md:mb-0">2</div>
+            <div class="day-number w-16 h-16 bg-emerald-500 text-white rounded-full flex items-center justify-center text-xl font-bold mb-4 md:mb-0">2</div>
             <div class="md:ml-8 w-full">
               <div class="bg-white p-6 rounded-xl shadow-md hover:shadow-lg transition">
                 <div class="flex justify-between items-start">
@@ -141,15 +145,15 @@
                   <span class="bg-green-100 text-green-800 text-sm px-3 py-1 rounded-full">City Tour</span>
                 </div>
                 <div class="mt-4 text-gray-600">
-                  <p><i class="fas fa-umbrella-beach mr-2 text-blue-500"></i>Full day of sightseeing in Vienna</p>
-                  <p><i class="fas fa-car mr-2 text-blue-500"></i>Afternoon drive to Klagenfurt/Villach (~2-3 hours)</p>
-                  <p><i class="fas fa-bed mr-2 text-blue-500"></i>Overnight: Klagenfurt/Villach</p>
+                  <p><i class="fas fa-umbrella-beach mr-2 text-emerald-600"></i>Full day of sightseeing in Vienna</p>
+                  <p><i class="fas fa-car mr-2 text-emerald-600"></i>Afternoon drive to Klagenfurt/Villach (~2-3 hours)</p>
+                  <p><i class="fas fa-bed mr-2 text-emerald-600"></i>Overnight: Klagenfurt/Villach</p>
                 </div>
               </div>
             </div>
           </div>
           <div class="trip-day relative flex flex-col md:flex-row items-center" data-day="3">
-            <div class="day-number w-16 h-16 bg-blue-500 text-white rounded-full flex items-center justify-center text-xl font-bold mb-4 md:mb-0">3</div>
+            <div class="day-number w-16 h-16 bg-emerald-500 text-white rounded-full flex items-center justify-center text-xl font-bold mb-4 md:mb-0">3</div>
             <div class="md:ml-8 w-full">
               <div class="bg-white p-6 rounded-xl shadow-md hover:shadow-lg transition">
                 <div class="flex justify-between items-start">
@@ -160,15 +164,15 @@
                   <span class="bg-yellow-100 text-yellow-800 text-sm px-3 py-1 rounded-full">Scenic Drive</span>
                 </div>
                 <div class="mt-4 text-gray-600">
-                  <p><i class="fas fa-clock mr-2 text-blue-500"></i>~5.5-6 hours drive</p>
-                  <p><i class="fas fa-water mr-2 text-blue-500"></i>Evening by the lake (Sirmione/Desenzano)</p>
-                  <p><i class="fas fa-bed mr-2 text-blue-500"></i>Overnight: Garda</p>
+                  <p><i class="fas fa-clock mr-2 text-emerald-600"></i>~5.5-6 hours drive</p>
+                  <p><i class="fas fa-water mr-2 text-emerald-600"></i>Evening by the lake (Sirmione/Desenzano)</p>
+                  <p><i class="fas fa-bed mr-2 text-emerald-600"></i>Overnight: Garda</p>
                 </div>
               </div>
             </div>
           </div>
           <div class="trip-day relative flex flex-col md:flex-row items-center" data-day="4">
-            <div class="day-number w-16 h-16 bg-blue-500 text-white rounded-full flex items-center justify-center text-xl font-bold mb-4 md:mb-0">4</div>
+            <div class="day-number w-16 h-16 bg-emerald-500 text-white rounded-full flex items-center justify-center text-xl font-bold mb-4 md:mb-0">4</div>
             <div class="md:ml-8 w-full">
               <div class="bg-white p-6 rounded-xl shadow-md hover:shadow-lg transition">
                 <div class="flex justify-between items-start">
@@ -179,16 +183,16 @@
                   <span class="bg-purple-100 text-purple-800 text-sm px-3 py-1 rounded-full">Nature Day</span>
                 </div>
                 <div class="mt-4 text-gray-600">
-                  <p><i class="fas fa-ship mr-2 text-blue-500"></i>Boat trips on the lake</p>
-                  <p><i class="fas fa-mountain mr-2 text-blue-500"></i>Visit Monte Baldo</p>
-                  <p><i class="fas fa-city mr-2 text-blue-500"></i>Evening in Verona</p>
-                  <p><i class="fas fa-bed mr-2 text-blue-500"></i>Overnight: Garda</p>
+                  <p><i class="fas fa-ship mr-2 text-emerald-600"></i>Boat trips on the lake</p>
+                  <p><i class="fas fa-mountain mr-2 text-emerald-600"></i>Visit Monte Baldo</p>
+                  <p><i class="fas fa-city mr-2 text-emerald-600"></i>Evening in Verona</p>
+                  <p><i class="fas fa-bed mr-2 text-emerald-600"></i>Overnight: Garda</p>
                 </div>
               </div>
             </div>
           </div>
           <div class="trip-day relative flex flex-col md:flex-row items-center" data-day="5">
-            <div class="day-number w-16 h-16 bg-blue-500 text-white rounded-full flex items-center justify-center text-xl font-bold mb-4 md:mb-0">5</div>
+            <div class="day-number w-16 h-16 bg-emerald-500 text-white rounded-full flex items-center justify-center text-xl font-bold mb-4 md:mb-0">5</div>
             <div class="md:ml-8 w-full">
               <div class="bg-white p-6 rounded-xl shadow-md hover:shadow-lg transition">
                 <div class="flex justify-between items-start">
@@ -196,13 +200,13 @@
                     <h3 class="text-xl font-semibold text-gray-800">Lake Garda → Florence</h3>
                     <p class="text-gray-500">Monday, 15 September 2025</p>
                   </div>
-                  <span class="bg-blue-100 text-blue-800 text-sm px-3 py-1 rounded-full">Travel Day</span>
+                  <span class="bg-emerald-100 text-emerald-800 text-sm px-3 py-1 rounded-full">Travel Day</span>
                 </div>
                 <div class="mt-4 text-gray-600">
-                  <p><i class="fas fa-sun mr-2 text-blue-500"></i>Morning by the lake</p>
-                  <p><i class="fas fa-clock mr-2 text-blue-500"></i>~3.5 hours drive to Florence</p>
-                  <p><i class="fas fa-utensils mr-2 text-blue-500"></i>Possible stop in Bologna</p>
-                  <p><i class="fas fa-bed mr-2 text-blue-500"></i>Overnight: Florence</p>
+                  <p><i class="fas fa-sun mr-2 text-emerald-600"></i>Morning by the lake</p>
+                  <p><i class="fas fa-clock mr-2 text-emerald-600"></i>~3.5 hours drive to Florence</p>
+                  <p><i class="fas fa-utensils mr-2 text-emerald-600"></i>Possible stop in Bologna</p>
+                  <p><i class="fas fa-bed mr-2 text-emerald-600"></i>Overnight: Florence</p>
                 </div>
               </div>
             </div>
@@ -211,7 +215,7 @@
           <!-- Hidden extra days 6–11 -->
           <div id="extraDays" class="timeline-hidden">
             <div class="trip-day relative flex flex-col md:flex-row items-center" data-day="6">
-              <div class="day-number w-16 h-16 bg-blue-500 text-white rounded-full flex items-center justify-center text-xl font-bold mb-4 md:mb-0">6</div>
+              <div class="day-number w-16 h-16 bg-emerald-500 text-white rounded-full flex items-center justify-center text-xl font-bold mb-4 md:mb-0">6</div>
               <div class="md:ml-8 w-full">
                 <div class="bg-white p-6 rounded-xl shadow-md hover:shadow-lg transition">
                   <div class="flex justify-between items-start">
@@ -221,12 +225,12 @@
                     </div>
                     <span class="bg-green-100 text-green-800 text-sm px-3 py-1 rounded-full">City Tour</span>
                   </div>
-                  <p class="mt-4 text-gray-600"><i class="fas fa-landmark mr-2 text-blue-500"></i>Uffizi, Duomo, Ponte Vecchio</p>
+                  <p class="mt-4 text-gray-600"><i class="fas fa-landmark mr-2 text-emerald-600"></i>Uffizi, Duomo, Ponte Vecchio</p>
                 </div>
               </div>
             </div>
             <div class="trip-day relative flex flex-col md:flex-row items-center" data-day="7">
-              <div class="day-number w-16 h-16 bg-blue-500 text-white rounded-full flex items-center justify-center text-xl font-bold mb-4 md:mb-0">7</div>
+              <div class="day-number w-16 h-16 bg-emerald-500 text-white rounded-full flex items-center justify-center text-xl font-bold mb-4 md:mb-0">7</div>
               <div class="md:ml-8 w-full">
                 <div class="bg-white p-6 rounded-xl shadow-md hover:shadow-lg transition">
                   <div class="flex justify-between items-start">
@@ -236,12 +240,12 @@
                     </div>
                     <span class="bg-yellow-100 text-yellow-800 text-sm px-3 py-1 rounded-full">Excursion</span>
                   </div>
-                  <p class="mt-4 text-gray-600"><i class="fas fa-tower-observation mr-2 text-blue-500"></i>Piazza dei Miracoli</p>
+                  <p class="mt-4 text-gray-600"><i class="fas fa-tower-observation mr-2 text-emerald-600"></i>Piazza dei Miracoli</p>
                 </div>
               </div>
             </div>
             <div class="trip-day relative flex flex-col md:flex-row items-center" data-day="8">
-              <div class="day-number w-16 h-16 bg-blue-500 text-white rounded-full flex items-center justify-center text-xl font-bold mb-4 md:mb-0">8</div>
+              <div class="day-number w-16 h-16 bg-emerald-500 text-white rounded-full flex items-center justify-center text-xl font-bold mb-4 md:mb-0">8</div>
               <div class="md:ml-8 w-full">
                 <div class="bg-white p-6 rounded-xl shadow-md hover:shadow-lg transition">
                   <div class="flex justify-between items-start">
@@ -249,14 +253,14 @@
                       <h3 class="text-xl font-semibold text-gray-800">Florence → Venice</h3>
                       <p class="text-gray-500">Thursday, 18 September 2025</p>
                     </div>
-                    <span class="bg-blue-100 text-blue-800 text-sm px-3 py-1 rounded-full">Travel Day</span>
+                    <span class="bg-emerald-100 text-emerald-800 text-sm px-3 py-1 rounded-full">Travel Day</span>
                   </div>
-                  <p class="mt-4 text-gray-600"><i class="fas fa-train-subway mr-2 text-blue-500"></i>Park in Mestre / Tronchetto</p>
+                  <p class="mt-4 text-gray-600"><i class="fas fa-train-subway mr-2 text-emerald-600"></i>Park in Mestre / Tronchetto</p>
                 </div>
               </div>
             </div>
             <div class="trip-day relative flex flex-col md:flex-row items-center" data-day="9">
-              <div class="day-number w-16 h-16 bg-blue-500 text-white rounded-full flex items-center justify-center text-xl font-bold mb-4 md:mb-0">9</div>
+              <div class="day-number w-16 h-16 bg-emerald-500 text-white rounded-full flex items-center justify-center text-xl font-bold mb-4 md:mb-0">9</div>
               <div class="md:ml-8 w-full">
                 <div class="bg-white p-6 rounded-xl shadow-md hover:shadow-lg transition">
                   <div class="flex justify-between items-start">
@@ -266,12 +270,12 @@
                     </div>
                     <span class="bg-purple-100 text-purple-800 text-sm px-3 py-1 rounded-full">City Tour</span>
                   </div>
-                  <p class="mt-4 text-gray-600"><i class="fas fa-ship mr-2 text-blue-500"></i>Vaporetto, Piazza San Marco, Rialto</p>
+                  <p class="mt-4 text-gray-600"><i class="fas fa-ship mr-2 text-emerald-600"></i>Vaporetto, Piazza San Marco, Rialto</p>
                 </div>
               </div>
             </div>
             <div class="trip-day relative flex flex-col md:flex-row items-center" data-day="10">
-              <div class="day-number w-16 h-16 bg-blue-500 text-white rounded-full flex items-center justify-center text-xl font-bold mb-4 md:mb-0">10</div>
+              <div class="day-number w-16 h-16 bg-emerald-500 text-white rounded-full flex items-center justify-center text-xl font-bold mb-4 md:mb-0">10</div>
               <div class="md:ml-8 w-full">
                 <div class="bg-white p-6 rounded-xl shadow-md hover:shadow-lg transition">
                   <div class="flex justify-between items-start">
@@ -281,12 +285,12 @@
                     </div>
                     <span class="bg-yellow-100 text-yellow-800 text-sm px-3 py-1 rounded-full">Return Drive</span>
                   </div>
-                  <p class="mt-4 text-gray-600"><i class="fas fa-road mr-2 text-blue-500"></i>~6 hours to Austria</p>
+                  <p class="mt-4 text-gray-600"><i class="fas fa-road mr-2 text-emerald-600"></i>~6 hours to Austria</p>
                 </div>
               </div>
             </div>
             <div class="trip-day relative flex flex-col md:flex-row items-center" data-day="11">
-              <div class="day-number w-16 h-16 bg-blue-500 text-white rounded-full flex items-center justify-center text-xl font-bold mb-4 md:mb-0">11</div>
+              <div class="day-number w-16 h-16 bg-emerald-500 text-white rounded-full flex items-center justify-center text-xl font-bold mb-4 md:mb-0">11</div>
               <div class="md:ml-8 w-full">
                 <div class="bg-white p-6 rounded-xl shadow-md hover:shadow-lg transition">
                   <div class="flex justify-between items-start">
@@ -294,16 +298,16 @@
                       <h3 class="text-xl font-semibold text-gray-800">Austria → Bydgoszcz</h3>
                       <p class="text-gray-500">Sunday, 21 September 2025</p>
                     </div>
-                    <span class="bg-blue-100 text-blue-800 text-sm px-3 py-1 rounded-full">Return Drive</span>
+                    <span class="bg-emerald-100 text-emerald-800 text-sm px-3 py-1 rounded-full">Return Drive</span>
                   </div>
-                  <p class="mt-4 text-gray-600"><i class="fas fa-house mr-2 text-blue-500"></i>Home sweet home</p>
+                  <p class="mt-4 text-gray-600"><i class="fas fa-house mr-2 text-emerald-600"></i>Home sweet home</p>
                 </div>
               </div>
             </div>
           </div>
 
           <div class="text-center mt-8">
-            <button id="showMoreDays" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition transform hover:scale-105">Show Full Itinerary</button>
+            <button id="showMoreDays" class="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-3 rounded-lg font-medium transition transform hover:scale-105">Show Full Itinerary</button>
           </div>
         </div>
       </div>
@@ -315,7 +319,7 @@
 
   <!-- Weather floating box -->
   <div id="weatherBox" class="hidden fixed bottom-16 right-[292px] w-[280px] bg-white/95 backdrop-blur rounded-xl shadow-lg z-50 border border-gray-200">
-    <div class="px-4 py-3 border-b bg-blue-600 text-white rounded-t-xl flex items-center justify-between">
+    <div class="px-4 py-3 border-b bg-emerald-700 text-white rounded-t-xl flex items-center justify-between">
       <div class="font-semibold"><i class="fas fa-cloud-sun mr-2"></i><span id="weatherTitle">Weather</span></div>
       <button id="closeWeather" class="text-white/80 hover:text-white"><i class="fas fa-times"></i></button>
     </div>
@@ -328,7 +332,7 @@
       <h2 class="text-3xl md:text-4xl font-bold text-center mb-12 text-gray-800">Accommodation & Parking</h2>
       <div class="grid md:grid-cols-2 gap-8">
         <div>
-          <h3 class="text-2xl font-semibold mb-6 text-gray-800 flex items-center"><i class="fas fa-hotel mr-3 text-blue-500"></i>Accommodation Suggestions</h3>
+          <h3 class="text-2xl font-semibold mb-6 text-gray-800 flex items-center"><i class="fas fa-hotel mr-3 text-emerald-600"></i>Accommodation Suggestions</h3>
           <div class="space-y-4">
             <div class="bg-gray-50 p-4 rounded-lg shadow-sm"><h4 class="font-medium text-gray-800">Vienna</h4><p class="text-gray-600 text-sm">Central hotel with garage (e.g. Motel One Wien-Staatsoper) or cheaper options near P+R Erdberg</p></div>
             <div class="bg-gray-50 p-4 rounded-lg shadow-sm"><h4 class="font-medium text-gray-800">Klagenfurt/Villach</h4><p class="text-gray-600 text-sm">Hotels near A2 highway for easy morning departure</p></div>
@@ -338,14 +342,14 @@
           </div>
         </div>
         <div>
-          <h3 class="text-2xl font-semibold mb-6 text-gray-800 flex items-center"><i class="fas fa-parking mr-3 text-blue-500"></i>Parking Information</h3>
+          <h3 class="text-2xl font-semibold mb-6 text-gray-800 flex items-center"><i class="fas fa-parking mr-3 text-emerald-600"></i>Parking Information</h3>
           <div class="space-y-4">
             <div class="bg-gray-50 p-4 rounded-lg shadow-sm"><h4 class="font-medium text-gray-800">Vienna</h4><p class="text-gray-600 text-sm">P+R Erdberg (Schlachthausgasse 2, 1030 Wien) + U3 metro</p></div>
             <div class="bg-gray-50 p-4 rounded-lg shadow-sm"><h4 class="font-medium text-gray-800">Florence</h4><p class="text-gray-600 text-sm">Villa Costanza P+R (T1 tram to center ~22 min)</p></div>
             <div class="bg-gray-50 p-4 rounded-lg shadow-sm"><h4 class="font-medium text-gray-800">Pisa</h4><p class="text-gray-600 text-sm">Via Cammeo Carlo Salomone (~€2.5/hour)</p></div>
             <div class="bg-gray-50 p-4 rounded-lg shadow-sm"><h4 class="font-medium text-gray-800">Venice</h4><p class="text-gray-600 text-sm">Tronchetto (~€29/24h) or Mestre Park Costa (~€5-14/day)</p></div>
           </div>
-          <div class="mt-8 bg-blue-50 p-4 rounded-lg border border-blue-100">
+          <div class="mt-8 bg-emerald-50 p-4 rounded-lg border border-emerald-100">
             <h4 class="font-medium text-gray-800 flex items-center"><i class="fas fa-exclamation-triangle mr-2 text-yellow-500"></i>Important Note</h4>
             <p class="text-gray-600 text-sm mt-2">Avoid entering ZTL (limited traffic zones) in Florence and Pisa without proper authorization to avoid fines.</p>
           </div>
@@ -361,19 +365,19 @@
       <div class="max-w-3xl mx-auto bg-white rounded-xl shadow-md overflow-hidden">
         <div class="p-6">
           <div class="grid md:grid-cols-2 gap-6">
-            <div class="border-b pb-4"><h3 class="text-lg font-semibold text-gray-800 mb-2">Fuel Costs</h3><div class="space-y-2"><div class="flex justify-between"><span class="text-gray-600">Total distance:</span><span class="font-medium">~3,500 km</span></div><div class="flex justify-between"><span class="text-gray-600">Fuel consumption:</span><span class="font-medium">9 l/100 km → 315 l</span></div><div class="flex justify-between"><span class="text-gray-600">Fuel price:</span><span class="font-medium">7.20 PLN/l</span></div><div class="flex justify-between pt-2 border-t"><span class="text-gray-800 font-semibold">Total:</span><span class="text-blue-600 font-bold">~2,268 PLN</span></div></div></div>
-            <div class="border-b pb-4"><h3 class="text-lg font-semibold text-gray-800 mb-2">Tolls & Vignettes</h3><div class="space-y-2"><div class="flex justify-between"><span class="text-gray-600">Austria vignettes:</span><span class="font-medium">10-day €12.40 + 1-day €9.30</span></div><div class="flex justify-between"><span class="text-gray-600">Italian highways:</span><span class="font-medium">~€140-€180</span></div><div class="flex justify-between pt-2 border-t"><span class="text-gray-800 font-semibold">Total:</span><span class="text-blue-600 font-bold">~€162-€202</span></div></div></div>
+            <div class="border-b pb-4"><h3 class="text-lg font-semibold text-gray-800 mb-2">Fuel Costs</h3><div class="space-y-2"><div class="flex justify-between"><span class="text-gray-600">Total distance:</span><span class="font-medium">~3,500 km</span></div><div class="flex justify-between"><span class="text-gray-600">Fuel consumption:</span><span class="font-medium">9 l/100 km → 315 l</span></div><div class="flex justify-between"><span class="text-gray-600">Fuel price:</span><span class="font-medium">7.20 PLN/l</span></div><div class="flex justify-between pt-2 border-t"><span class="text-gray-800 font-semibold">Total:</span><span class="text-emerald-600 font-bold">~2,268 PLN</span></div></div></div>
+            <div class="border-b pb-4"><h3 class="text-lg font-semibold text-gray-800 mb-2">Tolls & Vignettes</h3><div class="space-y-2"><div class="flex justify-between"><span class="text-gray-600">Austria vignettes:</span><span class="font-medium">10-day €12.40 + 1-day €9.30</span></div><div class="flex justify-between"><span class="text-gray-600">Italian highways:</span><span class="font-medium">~€140-€180</span></div><div class="flex justify-between pt-2 border-t"><span class="text-gray-800 font-semibold">Total:</span><span class="text-emerald-600 font-bold">~€162-€202</span></div></div></div>
             <div class="border-b pb-4"><h3 class="text-lg font-semibold text-gray-800 mb-2">Parking</h3><div class="space-y-2"><div class="flex justify-between"><span class="text-gray-600">City parking:</span><span class="font-medium">~€150-€200 total</span></div><div class="flex justify-between"><span class="text-gray-600">Venice parking:</span><span class="font-medium">~€29-€58</span></div></div></div>
             <div class="border-b pb-4"><h3 class="text-lg font-semibold text-gray-800 mb-2">Public Transport</h3><div class="space-y-2"><div class="flex justify-between"><span class="text-gray-600">Venice 24h ACTV ticket:</span><span class="font-medium">~€25/person</span></div><div class="flex justify-between"><span class="text-gray-600">For 4 people:</span><span class="font-medium">~€100</span></div></div></div>
           </div>
-          <div class="mt-8 bg-blue-50 p-4 rounded-lg">
+          <div class="mt-8 bg-emerald-50 p-4 rounded-lg">
             <h3 class="text-lg font-semibold text-gray-800 mb-2">Total Estimated Costs</h3>
-            <div class="flex justify-between items-center"><div><p class="text-gray-600">This includes fuel, tolls, parking, and public transport.</p><p class="text-sm text-gray-500 mt-1">Accommodation, food, and attractions not included.</p></div><div class="text-2xl font-bold text-blue-600">~3,000-3,500 PLN</div></div>
+            <div class="flex justify-between items-center"><div><p class="text-gray-600">This includes fuel, tolls, parking, and public transport.</p><p class="text-sm text-gray-500 mt-1">Accommodation, food, and attractions not included.</p></div><div class="text-2xl font-bold text-emerald-600">~3,000-3,500 PLN</div></div>
           </div>
         </div>
       </div>
       <div class="mt-8 text-center">
-        <button id="downloadPdf" class="inline-flex items-center gap-2 bg-white text-blue-600 border border-blue-200 hover:bg-blue-50 px-5 py-3 rounded-lg font-medium"><i class="fas fa-file-pdf"></i> Download simplified PDF itinerary</button>
+        <button id="downloadPdf" class="inline-flex items-center gap-2 bg-white text-emerald-700 border border-emerald-200 hover:bg-emerald-50 px-5 py-3 rounded-lg font-medium"><i class="fas fa-file-pdf"></i> Download simplified PDF itinerary</button>
       </div>
     </div>
   </section>
@@ -383,12 +387,12 @@
     <div class="container mx-auto px-4">
       <h2 class="text-3xl md:text-4xl font-bold text-center mb-12 text-gray-800">Travel Tips</h2>
       <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <div class="bg-gray-50 p-6 rounded-xl shadow-sm hover:shadow-md transition"><div class="text-blue-500 text-3xl mb-4"><i class="fas fa-ticket-alt"></i></div><h3 class="text-xl font-semibold mb-2 text-gray-800">Book Attractions Early</h3><p class="text-gray-600">Reserve tickets for Uffizi and Accademia galleries in Florence well in advance to avoid long queues.</p></div>
-        <div class="bg-gray-50 p-6 rounded-xl shadow-sm hover:shadow-md transition"><div class="text-blue-500 text-3xl mb-4"><i class="fas fa-ship"></i></div><h3 class="text-xl font-semibold mb-2 text-gray-800">Boat Schedules</h3><p class="text-gray-600">Check Lake Garda boat schedules the day before to plan your trips around the lake effectively.</p></div>
-        <div class="bg-gray-50 p-6 rounded-xl shadow-sm hover:shadow-md transition"><div class="text-blue-500 text-3xl mb-4"><i class="fas fa-car"></i></div><h3 class="text-xl font-semibold mb-2 text-gray-800">ZTL Zones</h3><p class="text-gray-600">Be careful with Limited Traffic Zones (ZTL) in Florence and Pisa - unauthorized entry results in fines.</p></div>
-        <div class="bg-gray-50 p-6 rounded-xl shadow-sm hover:shadow-md transition"><div class="text-blue-500 text-3xl mb-4"><i class="fas fa-money-bill-wave"></i></div><h3 class="text-xl font-semibold mb-2 text-gray-800">Cash for Small Payments</h3><p class="text-gray-600">Have cash ready for small highway tolls and parking payments where cards might not be accepted.</p></div>
-        <div class="bg-gray-50 p-6 rounded-xl shadow-sm hover:shadow-md transition"><div class="text-blue-500 text-3xl mb-4"><i class="fas fa-venice"></i></div><h3 class="text-xl font-semibold mb-2 text-gray-800">Venice Access</h3><p class="text-gray-600">No entrance fee for Venice in September 2025. Consider staying in Mestre for cheaper accommodation.</p></div>
-        <div class="bg-gray-50 p-6 rounded-xl shadow-sm hover:shadow-md transition"><div class="text-blue-500 text-3xl mb-4"><i class="fas fa-passport"></i></div><h3 class="text-xl font-semibold mb-2 text-gray-800">Documents</h3><p class="text-gray-600">Ensure all drivers have valid licenses, vehicle documents, and insurance for international travel.</p></div>
+        <div class="bg-gray-50 p-6 rounded-xl shadow-sm hover:shadow-md transition"><div class="text-emerald-600 text-3xl mb-4"><i class="fas fa-ticket-alt"></i></div><h3 class="text-xl font-semibold mb-2 text-gray-800">Book Attractions Early</h3><p class="text-gray-600">Reserve tickets for Uffizi and Accademia galleries in Florence well in advance to avoid long queues.</p></div>
+        <div class="bg-gray-50 p-6 rounded-xl shadow-sm hover:shadow-md transition"><div class="text-emerald-600 text-3xl mb-4"><i class="fas fa-ship"></i></div><h3 class="text-xl font-semibold mb-2 text-gray-800">Boat Schedules</h3><p class="text-gray-600">Check Lake Garda boat schedules the day before to plan your trips around the lake effectively.</p></div>
+        <div class="bg-gray-50 p-6 rounded-xl shadow-sm hover:shadow-md transition"><div class="text-emerald-600 text-3xl mb-4"><i class="fas fa-car"></i></div><h3 class="text-xl font-semibold mb-2 text-gray-800">ZTL Zones</h3><p class="text-gray-600">Be careful with Limited Traffic Zones (ZTL) in Florence and Pisa - unauthorized entry results in fines.</p></div>
+        <div class="bg-gray-50 p-6 rounded-xl shadow-sm hover:shadow-md transition"><div class="text-emerald-600 text-3xl mb-4"><i class="fas fa-money-bill-wave"></i></div><h3 class="text-xl font-semibold mb-2 text-gray-800">Cash for Small Payments</h3><p class="text-gray-600">Have cash ready for small highway tolls and parking payments where cards might not be accepted.</p></div>
+        <div class="bg-gray-50 p-6 rounded-xl shadow-sm hover:shadow-md transition"><div class="text-emerald-600 text-3xl mb-4"><i class="fas fa-venice"></i></div><h3 class="text-xl font-semibold mb-2 text-gray-800">Venice Access</h3><p class="text-gray-600">No entrance fee for Venice in September 2025. Consider staying in Mestre for cheaper accommodation.</p></div>
+        <div class="bg-gray-50 p-6 rounded-xl shadow-sm hover:shadow-md transition"><div class="text-emerald-600 text-3xl mb-4"><i class="fas fa-passport"></i></div><h3 class="text-xl font-semibold mb-2 text-gray-800">Documents</h3><p class="text-gray-600">Ensure all drivers have valid licenses, vehicle documents, and insurance for international travel.</p></div>
       </div>
     </div>
   </section>
@@ -419,33 +423,33 @@
   </section>
 
   <!-- Countdown -->
-  <section class="py-16 bg-blue-600 text-white">
+  <section class="py-16 bg-emerald-700 text-white">
     <div class="container mx-auto px-4 text-center">
       <h2 class="text-3xl md:text-4xl font-bold mb-6">Counting Down to Adventure</h2>
       <div class="flex justify-center space-x-4 md:space-x-8" id="countdown">
-        <div class="bg-white text-blue-600 rounded-lg p-4 w-20 md:w-24"><div class="text-2xl md:text-3xl font-bold" id="days">--</div><div class="text-sm">Days</div></div>
-        <div class="bg-white text-blue-600 rounded-lg p-4 w-20 md:w-24"><div class="text-2xl md:text-3xl font-bold" id="hours">--</div><div class="text-sm">Hours</div></div>
-        <div class="bg-white text-blue-600 rounded-lg p-4 w-20 md:w-24"><div class="text-2xl md:text-3xl font-bold" id="minutes">--</div><div class="text-sm">Minutes</div></div>
-        <div class="bg-white text-blue-600 rounded-lg p-4 w-20 md:w-24"><div class="text-2xl md:text-3xl font-bold" id="seconds">--</div><div class="text-sm">Seconds</div></div>
+        <div class="bg-white text-emerald-700 rounded-lg p-4 w-20 md:w-24"><div class="text-2xl md:text-3xl font-bold" id="days">--</div><div class="text-sm">Days</div></div>
+        <div class="bg-white text-emerald-700 rounded-lg p-4 w-20 md:w-24"><div class="text-2xl md:text-3xl font-bold" id="hours">--</div><div class="text-sm">Hours</div></div>
+        <div class="bg-white text-emerald-700 rounded-lg p-4 w-20 md:w-24"><div class="text-2xl md:text-3xl font-bold" id="minutes">--</div><div class="text-sm">Minutes</div></div>
+        <div class="bg-white text-emerald-700 rounded-lg p-4 w-20 md:w-24"><div class="text-2xl md:text-3xl font-bold" id="seconds">--</div><div class="text-sm">Seconds</div></div>
       </div>
-      <p class="mt-8 text-blue-100">We're excited for our journey from Bydgoszcz through Vienna to the beautiful Italian lakes and cities!</p>
+      <p class="mt-8 text-emerald-100">Siamo pronti! From Bydgoszcz through Vienna to the Italian lakes and cities.</p>
     </div>
   </section>
 
   <!-- Footer -->
-  <footer class="bg-gray-800 text-white py-8">
+  <footer class="bg-gray-900 text-white py-8">
     <div class="container mx-auto px-4">
       <div class="flex flex-col md:flex-row justify-between items-center">
-        <div class="mb-4 md:mb-0"><div class="flex items-center space-x-2"><i class="fas fa-route text-2xl text-blue-400"></i><span class="text-xl font-bold">Road Trip 2025</span></div><p class="text-gray-400 mt-2">Bydgoszcz to Italy • 11-21 September 2025</p></div>
+        <div class="mb-4 md:mb-0"><div class="flex items-center space-x-2"><i class="fas fa-route text-2xl text-emerald-400"></i><span class="text-xl font-bold">Road Trip 2025</span></div><p class="text-gray-400 mt-2">Bydgoszcz to Italy • 11-21 September 2025</p></div>
         <div class="flex space-x-6"><a href="#" class="text-gray-400 hover:text-white transition"><i class="fab fa-facebook-f text-xl"></i></a><a href="#" class="text-gray-400 hover:text-white transition"><i class="fab fa-instagram text-xl"></i></a><a href="#" class="text-gray-400 hover:text-white transition"><i class="fab fa-twitter text-xl"></i></a></div>
       </div>
-      <div class="border-t border-gray-700 mt-8 pt-8 text-center text-gray-400"><p>Created with ❤️ for our unforgettable road trip adventure</p><p class="mt-2 text-sm">© 2025 Road Trip Crew. All rights reserved.</p></div>
+      <div class="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400"><p>Created with ❤️ for our unforgettable road trip adventure</p><p class="mt-2 text-sm">© 2025 Road Trip Crew. All rights reserved.</p></div>
     </div>
   </footer>
 
   <!-- Lightweight alerts -->
   <div id="appAlerts" class="hidden fixed top-4 left-1/2 -translate-x-1/2 z-[100]">
-    <div class="bg-red-600 text-white px-4 py-2 rounded-lg shadow-lg text-sm" id="appAlertsMsg"></div>
+    <div class="bg-rose-600 text-white px-4 py-2 rounded-lg shadow-lg text-sm" id="appAlertsMsg"></div>
   </div>
 
   <script>
@@ -502,30 +506,25 @@
 
       WAYPOINTS.forEach((wp) => {
         const isStop = ![1,5,8,11].includes(wp.day) ? 'marker-stop' : 'marker-day';
-        const icon = L.divIcon({ className: 'leaflet-div-icon', html: `<div class="marker-dot ${isStop}">${wp.day}</div>`, iconSize: [30,30], iconAnchor: [15,15] });
+        const icon = L.divIcon({ className: 'leaflet-div-icon', html: `<div class=\"marker-dot ${isStop}\">${wp.day}</div>`, iconSize: [30,30], iconAnchor: [15,15] });
         const m = L.marker([wp.lat, wp.lng], { icon }).addTo(map);
         m.bindPopup(`<strong>Day ${wp.day}</strong><br>${wp.title}<br><em>${wp.city}</em><br>${wp.note}`);
         m._day = wp.day; markers.push(m);
       });
 
       const latlngs = WAYPOINTS.map(w => [w.lat, w.lng]);
-      routeLine = L.polyline(latlngs, { weight: 5, opacity: 0.7 }).addTo(map);
+      routeLine = L.polyline(latlngs, { weight: 5, opacity: 0.7, color: '#059669' }).addTo(map);
       map.fitBounds(routeLine.getBounds(), { padding: [20,20] });
 
       const km = (function(){ let d=0; for(let i=1;i<latlngs.length;i++){ d += haversine(latlngs[i-1], latlngs[i]); } return Math.round(d); })();
       const info = L.control({ position: 'bottomleft' });
-      info.onAdd = function(){ const div = L.DomUtil.create('div', 'bg-white/90 rounded-lg shadow p-2 text-sm'); div.innerHTML = `<i class="fas fa-road mr-1 text-blue-600"></i>Approx route length: <strong>${km} km</strong>`; return div; };
+      info.onAdd = function(){ const div = L.DomUtil.create('div', 'bg-white/90 rounded-lg shadow p-2 text-sm'); div.innerHTML = `<i class=\"fas fa-road mr-1 text-emerald-600\"></i>Approx route length: <strong>${km} km</strong>`; return div; };
       info.addTo(map);
 
       bindTimelineInteractions();
     }
 
-    function haversine(a, b) {
-      const toRad = x => x * Math.PI / 180; const [lat1, lon1] = a; const [lat2, lon2] = b; const R = 6371;
-      const dLat = toRad(lat2-lat1), dLon = toRad(lon2-lon1);
-      const s1 = Math.sin(dLat/2)**2 + Math.cos(toRad(lat1))*Math.cos(toRad(lat2))*Math.sin(dLon/2)**2;
-      return 2 * R * Math.asin(Math.sqrt(s1));
-    }
+    function haversine(a, b) { const toRad = x => x * Math.PI / 180; const [lat1, lon1] = a; const [lat2, lon2] = b; const R = 6371; const dLat = toRad(lat2-lat1), dLon = toRad(lon2-lon1); const s1 = Math.sin(dLat/2)**2 + Math.cos(toRad(lat1))*Math.cos(toRad(lat2))*Math.sin(dLon/2)**2; return 2 * R * Math.asin(Math.sqrt(s1)); }
 
     function bindTimelineInteractions(){
       const items = document.querySelectorAll('.trip-day');
@@ -545,9 +544,10 @@
       const latlng = m.getLatLng();
       map.panTo(latlng, { animate: true });
       if(opts.openPopup) { m.openPopup(); }
-      document.querySelectorAll('.trip-day').forEach(el => el.classList.remove('ring-2','ring-blue-400'));
+      document.querySelectorAll('.trip-day').forEach(el => el.classList.remove('ring-2','ring-emerald-400'));
       const el = document.querySelector(`.trip-day[data-day="${day}"]`);
-      if(el) el.classList.add('ring-2','ring-blue-400');
+      if(el) el.classList.add('ring-2','ring-emerald-400');
+      fetchWeatherForDay(day);
     }
 
     // Show more days
@@ -566,7 +566,7 @@
       miniMap = L.map('miniMap', { zoomControl:false, attributionControl:false, dragging:true, scrollWheelZoom:false });
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(miniMap);
       const latlngs = WAYPOINTS.map(w => [w.lat, w.lng]);
-      miniRoute = L.polyline(latlngs, { weight: 3, opacity: 0.7 }).addTo(miniMap);
+      miniRoute = L.polyline(latlngs, { weight: 3, opacity: 0.7, color:'#059669' }).addTo(miniMap);
       miniMap.fitBounds(miniRoute.getBounds(), { padding: [10,10] });
       WAYPOINTS.forEach((wp)=>{
         const icon = L.divIcon({ className:'leaflet-div-icon', html:`<div class='marker-dot marker-day' style='transform:scale(.7)'>${wp.day}</div>`, iconSize:[22,22], iconAnchor:[11,11] });
@@ -595,17 +595,16 @@
         DAY_PHOTOS[day].forEach(url => { const img = document.createElement('img'); img.loading='lazy'; img.src=url; img.alt='Photo'; container.appendChild(img); });
         const card = dayEl.querySelector('.bg-white');
         const toggler = document.createElement('button');
-        toggler.className = 'mt-3 text-sm text-blue-600 hover:text-blue-800 font-medium';
+        toggler.className = 'mt-3 text-sm text-emerald-700 hover:text-emerald-900 font-medium';
         toggler.innerHTML = '<i class="fas fa-images mr-1"></i> Show photos';
         let visible = false;
         toggler.addEventListener('click', () => { visible = !visible; toggler.textContent = visible ? 'Hide photos' : 'Show photos'; container.style.display = visible ? 'flex' : 'none'; });
         container.style.display = 'none'; card.appendChild(toggler); card.appendChild(container);
 
-        // Weather button for quick access
         const header = card.querySelector('.flex.justify-between');
         if(header && !card.querySelector('.weather-btn')){
           const btn = document.createElement('button');
-          btn.className = 'weather-btn ml-2 inline-flex items-center text-xs px-2 py-1 rounded bg-blue-50 text-blue-700 hover:bg-blue-100';
+          btn.className = 'weather-btn ml-2 inline-flex items-center text-xs px-2 py-1 rounded bg-emerald-50 text-emerald-700 hover:bg-emerald-100';
           btn.innerHTML = '<i class="fas fa-cloud-sun mr-1"></i> Weather';
           btn.addEventListener('click', (e)=>{ e.stopPropagation(); focusDay(day, { openPopup:false }); });
           header.appendChild(btn);
@@ -635,9 +634,6 @@
       }catch(e){ weatherContent.textContent = 'Could not load weather right now.'; }
     }
 
-    const _origFocusDay = focusDay;
-    focusDay = function(day, opts){ _origFocusDay(day, opts); fetchWeatherForDay(day); };
-
     // ===== PDF EXPORT =====
     document.getElementById('downloadPdf').addEventListener('click', async ()=>{
       if (!window.jspdf) { await loadScript('https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js'); }
@@ -651,7 +647,7 @@
       doc.text('Dates: 11–21 September 2025', margin, y); y += 10;
       doc.text('Route: Bydgoszcz → Vienna → Lake Garda → Florence → Pisa → Venice → Bydgoszcz', margin, y); y += 20;
       WAYPOINTS.forEach(wp => { if(y > 780){ doc.addPage(); y = margin; } doc.setFont('helvetica','bold'); doc.text(`Day ${wp.day}: ${wp.title}`, margin, y); y += 14; doc.setFont('helvetica',''); doc.text(`Stop: ${wp.city} — ${wp.note}`, margin, y); y += 18; });
-      doc.save('RoadTrip2025-Itinerary.pdf');
+      doc.save('RoadTrip2025-ItalianTheme.pdf');
     });
 
     // ===== Initialize on load with fallbacks =====
@@ -665,9 +661,7 @@
     });
 
     // ===== Utilities =====
-    function loadScript(src){
-      return new Promise((resolve, reject)=>{ const s = document.createElement('script'); s.src = src; s.async = true; s.onload = ()=> resolve(); s.onerror = ()=> reject(new Error('Failed to load '+src)); document.head.appendChild(s); });
-    }
+    function loadScript(src){ return new Promise((resolve, reject)=>{ const s = document.createElement('script'); s.src = src; s.async = true; s.onload = ()=> resolve(); s.onerror = ()=> reject(new Error('Failed to load '+src)); document.head.appendChild(s); }); }
     function alertUser(msg){ const box = document.getElementById('appAlerts'); const msgEl = document.getElementById('appAlertsMsg'); if(!box || !msgEl){ alert(msg); return; } msgEl.textContent = msg; box.classList.remove('hidden'); setTimeout(()=> box.classList.add('hidden'), 4000); }
   </script>
 </body>
