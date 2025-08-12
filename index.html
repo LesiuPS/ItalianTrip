@@ -5,22 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Road Trip Adventure - Bydgoszcz to Italy 2025</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <link
-    rel="stylesheet"
-    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
-  />
-  <!-- Leaflet -->
-  <link
-    rel="stylesheet"
-    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
-    crossorigin=""
-  />
-  <script
-    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
-    crossorigin=""
-  ></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <!-- Leaflet core -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+  <!-- jsPDF (no SRI for compatibility) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <style>
     .map-container { height: 400px; width: 100%; }
     .trip-day:hover .day-number { transform: scale(1.1); background-color: #3b82f6; }
@@ -33,9 +23,6 @@
     .marker-day { background:#3b82f6; }
     .marker-stop { background:#10b981; }
     .timeline-hidden { display:none; }
-  </style>
-  <!-- Day galleries & sticky mini map small tweaks -->
-  <style>
     /* Sticky mini map */
     #miniMap { position: fixed; bottom: 16px; right: 16px; width: 260px; height: 180px; z-index: 60; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,.25); }
     #miniMap .leaflet-control-attribution { display:none; }
@@ -44,17 +31,12 @@
     .photo-strip img { height:84px; width:auto; border-radius:10px; object-fit:cover; flex:0 0 auto; }
     .comment-card { background:#fff; border:1px solid #e5e7eb; border-radius:14px; padding:16px; box-shadow:0 4px 10px rgba(0,0,0,.04); }
   </style>
-  <!-- jsPDF for client-side PDF export (no SRI for wider compatibility) -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body class="font-sans bg-gray-50">
   <!-- Navigation -->
   <nav class="bg-blue-600 text-white sticky top-0 z-50 shadow-lg">
     <div class="container mx-auto px-4 py-3 flex justify-between items-center">
-      <div class="flex items-center space-x-2">
-        <i class="fas fa-route text-2xl"></i>
-        <span class="text-xl font-bold">Road Trip 2025</span>
-      </div>
+      <div class="flex items-center space-x-2"><i class="fas fa-route text-2xl"></i><span class="text-xl font-bold">Road Trip 2025</span></div>
       <div class="hidden md:flex space-x-6">
         <a href="#overview" class="hover:text-blue-200 transition">Overview</a>
         <a href="#itinerary" class="hover:text-blue-200 transition">Itinerary</a>
@@ -114,14 +96,8 @@
         </div>
       </div>
       <div class="mt-16 bg-gray-100 rounded-xl overflow-hidden shadow-lg">
-        <div class="p-4 bg-blue-600 text-white">
-          <h3 class="text-xl font-semibold"><i class="fas fa-map-marked-alt mr-2"></i>Trip Map</h3>
-        </div>
-        <div class="map-container" id="map">
-          <div class="h-full flex items-center justify-center bg-gray-200">
-            <p class="text-gray-500">Interactive map loading...</p>
-          </div>
-        </div>
+        <div class="p-4 bg-blue-600 text-white"><h3 class="text-xl font-semibold"><i class="fas fa-map-marked-alt mr-2"></i>Trip Map</h3></div>
+        <div class="map-container" id="map"><div class="h-full flex items-center justify-center bg-gray-200"><p class="text-gray-500">Interactive map loading...</p></div></div>
       </div>
     </div>
   </section>
@@ -133,9 +109,9 @@
       <div class="relative">
         <div class="hidden md:block absolute left-1/2 h-full w-1 bg-blue-400 transform -translate-x-1/2"></div>
         <div id="timeline" class="space-y-8">
-          <!-- Existing 1-5 (kept as-is); map JS will bind by order automatically -->
+          <!-- Days 1–5 -->
           <div class="trip-day relative flex flex-col md:flex-row items-center" data-day="1">
-            <div class="day-number flex-shrink-0 w-16 h-16 bg-blue-500 text-white rounded-full flex items-center justify-center text-xl font-bold mb-4 md:mb-0 transform transition">1</div>
+            <div class="day-number w-16 h-16 bg-blue-500 text-white rounded-full flex items-center justify-center text-xl font-bold mb-4 md:mb-0">1</div>
             <div class="md:ml-8 w-full">
               <div class="bg-white p-6 rounded-xl shadow-md hover:shadow-lg transition">
                 <div class="flex justify-between items-start">
@@ -154,7 +130,7 @@
             </div>
           </div>
           <div class="trip-day relative flex flex-col md:flex-row items-center" data-day="2">
-            <div class="day-number flex-shrink-0 w-16 h-16 bg-blue-500 text-white rounded-full flex items-center justify-center text-xl font-bold mb-4 md:mb-0 transform transition">2</div>
+            <div class="day-number w-16 h-16 bg-blue-500 text-white rounded-full flex items-center justify-center text-xl font-bold mb-4 md:mb-0">2</div>
             <div class="md:ml-8 w-full">
               <div class="bg-white p-6 rounded-xl shadow-md hover:shadow-lg transition">
                 <div class="flex justify-between items-start">
@@ -173,7 +149,7 @@
             </div>
           </div>
           <div class="trip-day relative flex flex-col md:flex-row items-center" data-day="3">
-            <div class="day-number flex-shrink-0 w-16 h-16 bg-blue-500 text-white rounded-full flex items-center justify-center text-xl font-bold mb-4 md:mb-0 transform transition">3</div>
+            <div class="day-number w-16 h-16 bg-blue-500 text-white rounded-full flex items-center justify-center text-xl font-bold mb-4 md:mb-0">3</div>
             <div class="md:ml-8 w-full">
               <div class="bg-white p-6 rounded-xl shadow-md hover:shadow-lg transition">
                 <div class="flex justify-between items-start">
@@ -192,7 +168,7 @@
             </div>
           </div>
           <div class="trip-day relative flex flex-col md:flex-row items-center" data-day="4">
-            <div class="day-number flex-shrink-0 w-16 h-16 bg-blue-500 text-white rounded-full flex items-center justify-center text-xl font-bold mb-4 md:mb-0 transform transition">4</div>
+            <div class="day-number w-16 h-16 bg-blue-500 text-white rounded-full flex items-center justify-center text-xl font-bold mb-4 md:mb-0">4</div>
             <div class="md:ml-8 w-full">
               <div class="bg-white p-6 rounded-xl shadow-md hover:shadow-lg transition">
                 <div class="flex justify-between items-start">
@@ -212,7 +188,7 @@
             </div>
           </div>
           <div class="trip-day relative flex flex-col md:flex-row items-center" data-day="5">
-            <div class="day-number flex-shrink-0 w-16 h-16 bg-blue-500 text-white rounded-full flex items-center justify-center text-xl font-bold mb-4 md:mb-0 transform transition">5</div>
+            <div class="day-number w-16 h-16 bg-blue-500 text-white rounded-full flex items-center justify-center text-xl font-bold mb-4 md:mb-0">5</div>
             <div class="md:ml-8 w-full">
               <div class="bg-white p-6 rounded-xl shadow-md hover:shadow-lg transition">
                 <div class="flex justify-between items-start">
@@ -231,7 +207,8 @@
               </div>
             </div>
           </div>
-          <!-- Hidden extra days; will be toggled by the button -->
+
+          <!-- Hidden extra days 6–11 -->
           <div id="extraDays" class="timeline-hidden">
             <div class="trip-day relative flex flex-col md:flex-row items-center" data-day="6">
               <div class="day-number w-16 h-16 bg-blue-500 text-white rounded-full flex items-center justify-center text-xl font-bold mb-4 md:mb-0">6</div>
@@ -333,7 +310,19 @@
     </div>
   </section>
 
-  <!-- Accommodation (unchanged content from your version, trimmed for brevity) -->
+  <!-- Sticky mini map container -->
+  <div id="miniMap" class="bg-white rounded-xl shadow-lg"></div>
+
+  <!-- Weather floating box -->
+  <div id="weatherBox" class="hidden fixed bottom-16 right-[292px] w-[280px] bg-white/95 backdrop-blur rounded-xl shadow-lg z-50 border border-gray-200">
+    <div class="px-4 py-3 border-b bg-blue-600 text-white rounded-t-xl flex items-center justify-between">
+      <div class="font-semibold"><i class="fas fa-cloud-sun mr-2"></i><span id="weatherTitle">Weather</span></div>
+      <button id="closeWeather" class="text-white/80 hover:text-white"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="p-3 text-sm" id="weatherContent">Select a day to see a 7‑day forecast for that stop.</div>
+  </div>
+
+  <!-- Accommodation -->
   <section id="accommodation" class="py-16 bg-white">
     <div class="container mx-auto px-4">
       <h2 class="text-3xl md:text-4xl font-bold text-center mb-12 text-gray-800">Accommodation & Parking</h2>
@@ -365,73 +354,31 @@
     </div>
   </section>
 
-  <!-- Budget (kept) -->
+  <!-- Budget -->
   <section id="budget" class="py-16 bg-gray-50">
     <div class="container mx-auto px-4">
       <h2 class="text-3xl md:text-4xl font-bold text-center mb-12 text-gray-800">Estimated Budget</h2>
       <div class="max-w-3xl mx-auto bg-white rounded-xl shadow-md overflow-hidden">
         <div class="p-6">
           <div class="grid md:grid-cols-2 gap-6">
-            <div class="border-b pb-4">
-              <h3 class="text-lg font-semibold text-gray-800 mb-2">Fuel Costs</h3>
-              <div class="space-y-2">
-                <div class="flex justify-between"><span class="text-gray-600">Total distance:</span><span class="font-medium">~3,500 km</span></div>
-                <div class="flex justify-between"><span class="text-gray-600">Fuel consumption:</span><span class="font-medium">9 l/100 km → 315 l</span></div>
-                <div class="flex justify-between"><span class="text-gray-600">Fuel price:</span><span class="font-medium">7.20 PLN/l</span></div>
-                <div class="flex justify-between pt-2 border-t"><span class="text-gray-800 font-semibold">Total:</span><span class="text-blue-600 font-bold">~2,268 PLN</span></div>
-              </div>
-            </div>
-            <div class="border-b pb-4">
-              <h3 class="text-lg font-semibold text-gray-800 mb-2">Tolls & Vignettes</h3>
-              <div class="space-y-2">
-                <div class="flex justify-between"><span class="text-gray-600">Austria vignettes:</span><span class="font-medium">10-day €12.40 + 1-day €9.30</span></div>
-                <div class="flex justify-between"><span class="text-gray-600">Italian highways:</span><span class="font-medium">~€140-€180</span></div>
-                <div class="flex justify-between pt-2 border-t"><span class="text-gray-800 font-semibold">Total:</span><span class="text-blue-600 font-bold">~€162-€202</span></div>
-              </div>
-            </div>
-            <div class="border-b pb-4">
-              <h3 class="text-lg font-semibold text-gray-800 mb-2">Parking</h3>
-              <div class="space-y-2">
-                <div class="flex justify-between"><span class="text-gray-600">City parking:</span><span class="font-medium">~€150-€200 total</span></div>
-                <div class="flex justify-between"><span class="text-gray-600">Venice parking:</span><span class="font-medium">~€29-€58</span></div>
-              </div>
-            </div>
-            <div class="border-b pb-4">
-              <h3 class="text-lg font-semibold text-gray-800 mb-2">Public Transport</h3>
-              <div class="space-y-2">
-                <div class="flex justify-between"><span class="text-gray-600">Venice 24h ACTV ticket:</span><span class="font-medium">~€25/person</span></div>
-                <div class="flex justify-between"><span class="text-gray-600">For 4 people:</span><span class="font-medium">~€100</span></div>
-              </div>
-            </div>
+            <div class="border-b pb-4"><h3 class="text-lg font-semibold text-gray-800 mb-2">Fuel Costs</h3><div class="space-y-2"><div class="flex justify-between"><span class="text-gray-600">Total distance:</span><span class="font-medium">~3,500 km</span></div><div class="flex justify-between"><span class="text-gray-600">Fuel consumption:</span><span class="font-medium">9 l/100 km → 315 l</span></div><div class="flex justify-between"><span class="text-gray-600">Fuel price:</span><span class="font-medium">7.20 PLN/l</span></div><div class="flex justify-between pt-2 border-t"><span class="text-gray-800 font-semibold">Total:</span><span class="text-blue-600 font-bold">~2,268 PLN</span></div></div></div>
+            <div class="border-b pb-4"><h3 class="text-lg font-semibold text-gray-800 mb-2">Tolls & Vignettes</h3><div class="space-y-2"><div class="flex justify-between"><span class="text-gray-600">Austria vignettes:</span><span class="font-medium">10-day €12.40 + 1-day €9.30</span></div><div class="flex justify-between"><span class="text-gray-600">Italian highways:</span><span class="font-medium">~€140-€180</span></div><div class="flex justify-between pt-2 border-t"><span class="text-gray-800 font-semibold">Total:</span><span class="text-blue-600 font-bold">~€162-€202</span></div></div></div>
+            <div class="border-b pb-4"><h3 class="text-lg font-semibold text-gray-800 mb-2">Parking</h3><div class="space-y-2"><div class="flex justify-between"><span class="text-gray-600">City parking:</span><span class="font-medium">~€150-€200 total</span></div><div class="flex justify-between"><span class="text-gray-600">Venice parking:</span><span class="font-medium">~€29-€58</span></div></div></div>
+            <div class="border-b pb-4"><h3 class="text-lg font-semibold text-gray-800 mb-2">Public Transport</h3><div class="space-y-2"><div class="flex justify-between"><span class="text-gray-600">Venice 24h ACTV ticket:</span><span class="font-medium">~€25/person</span></div><div class="flex justify-between"><span class="text-gray-600">For 4 people:</span><span class="font-medium">~€100</span></div></div></div>
           </div>
           <div class="mt-8 bg-blue-50 p-4 rounded-lg">
             <h3 class="text-lg font-semibold text-gray-800 mb-2">Total Estimated Costs</h3>
-            <div class="flex justify-between items-center">
-              <div>
-                <p class="text-gray-600">This includes fuel, tolls, parking, and public transport.</p>
-                <p class="text-sm text-gray-500 mt-1">Accommodation, food, and attractions not included.</p>
-              </div>
-              <div class="text-2xl font-bold text-blue-600">~3,000-3,500 PLN</div>
-            </div>
+            <div class="flex justify-between items-center"><div><p class="text-gray-600">This includes fuel, tolls, parking, and public transport.</p><p class="text-sm text-gray-500 mt-1">Accommodation, food, and attractions not included.</p></div><div class="text-2xl font-bold text-blue-600">~3,000-3,500 PLN</div></div>
           </div>
         </div>
+      </div>
+      <div class="mt-8 text-center">
+        <button id="downloadPdf" class="inline-flex items-center gap-2 bg-white text-blue-600 border border-blue-200 hover:bg-blue-50 px-5 py-3 rounded-lg font-medium"><i class="fas fa-file-pdf"></i> Download simplified PDF itinerary</button>
       </div>
     </div>
   </section>
 
-  <!-- Sticky mini map container -->
-  <div id="miniMap" class="bg-white rounded-xl shadow-lg"></div>
-
-  <!-- Weather floating box -->
-  <div id="weatherBox" class="hidden fixed bottom-16 right-[292px] w-[280px] bg-white/95 backdrop-blur rounded-xl shadow-lg z-50 border border-gray-200">
-    <div class="px-4 py-3 border-b bg-blue-600 text-white rounded-t-xl flex items-center justify-between">
-      <div class="font-semibold"><i class="fas fa-cloud-sun mr-2"></i><span id="weatherTitle">Weather</span></div>
-      <button id="closeWeather" class="text-white/80 hover:text-white"><i class="fas fa-times"></i></button>
-    </div>
-    <div class="p-3 text-sm" id="weatherContent">Select a day to see a 7‑day forecast for that stop.</div>
-  </div>
-
-  <!-- Tips (kept) -->
+  <!-- Tips -->
   <section id="tips" class="py-16 bg-white">
     <div class="container mx-auto px-4">
       <h2 class="text-3xl md:text-4xl font-bold text-center mb-12 text-gray-800">Travel Tips</h2>
@@ -446,26 +393,27 @@
     </div>
   </section>
 
-  <!-- Lightweight alerts -->
-  <div id="appAlerts" class="hidden fixed top-4 left-1/2 -translate-x-1/2 z-[100]">
-    <div class="bg-red-600 text-white px-4 py-2 rounded-lg shadow-lg text-sm" id="appAlertsMsg"></div>
-  </div>
-
-  <!-- Comments Section -->
+  <!-- Comments (Giscus) -->
   <section id="comments" class="py-16 bg-gray-50">
     <div class="container mx-auto px-4">
-      <h2 class="text-3xl md:text-4xl font-bold text-center mb-10 text-gray-800">Guestbook & Comments</h2>
-      <div class="max-w-3xl mx-auto space-y-6">
-        <div class="comment-card">
-          <div class="grid md:grid-cols-3 gap-3">
-            <input id="cName" type="text" placeholder="Your name" class="md:col-span-1 border rounded-lg px-3 py-2 w-full" />
-            <input id="cPlace" type="text" placeholder="Place or tip (optional)" class="md:col-span-1 border rounded-lg px-3 py-2 w-full" />
-            <button id="cSubmit" class="md:col-span-1 bg-blue-600 hover:bg-blue-700 text-white rounded-lg px-4 py-2 font-medium w-full">Post comment</button>
-          </div>
-          <textarea id="cText" rows="3" placeholder="Share a tip, memory, or must‑see!" class="border rounded-lg px-3 py-2 w-full mt-3"></textarea>
-        </div>
-        <div class="text-xs text-gray-500">Comments are saved only in this browser (localStorage). They won't sync across devices.</div>
-        <div id="cList" class="space-y-4"></div>
+      <h2 class="text-3xl md:text-4xl font-bold text-center mb-6 text-gray-800">Guestbook & Comments</h2>
+      <p class="text-center text-gray-500 mb-8">Powered by <a class="underline" href="https://giscus.app" target="_blank" rel="noopener">Giscus</a> (GitHub Discussions). Comments sync across devices.</p>
+      <div class="max-w-3xl mx-auto">
+        <script src="https://giscus.app/client.js"
+                data-repo="LesiuPS/ItalianTrip"
+                data-repo-id="R_kgDOPbuJbg"
+                data-category="General"
+                data-category-id="DIC_kwDOPbuJbs4CuEZA"
+                data-mapping="pathname"
+                data-strict="0"
+                data-reactions-enabled="1"
+                data-emit-metadata="0"
+                data-input-position="bottom"
+                data-theme="light"
+                data-lang="en"
+                crossorigin="anonymous"
+                async>
+        </script>
       </div>
     </div>
   </section>
@@ -482,34 +430,23 @@
       </div>
       <p class="mt-8 text-blue-100">We're excited for our journey from Bydgoszcz through Vienna to the beautiful Italian lakes and cities!</p>
     </div>
-      <div class="mt-8 text-center">
-        <button id="downloadPdf" class="inline-flex items-center gap-2 bg-white text-blue-600 border border-blue-200 hover:bg-blue-50 px-5 py-3 rounded-lg font-medium">
-          <i class="fas fa-file-pdf"></i> Download simplified PDF itinerary
-        </button>
-      </div>
-    </div>
   </section>
 
   <!-- Footer -->
   <footer class="bg-gray-800 text-white py-8">
     <div class="container mx-auto px-4">
       <div class="flex flex-col md:flex-row justify-between items-center">
-        <div class="mb-4 md:mb-0">
-          <div class="flex items-center space-x-2"><i class="fas fa-route text-2xl text-blue-400"></i><span class="text-xl font-bold">Road Trip 2025</span></div>
-          <p class="text-gray-400 mt-2">Bydgoszcz to Italy • 11-21 September 2025</p>
-        </div>
-        <div class="flex space-x-6">
-          <a href="#" class="text-gray-400 hover:text-white transition"><i class="fab fa-facebook-f text-xl"></i></a>
-          <a href="#" class="text-gray-400 hover:text-white transition"><i class="fab fa-instagram text-xl"></i></a>
-          <a href="#" class="text-gray-400 hover:text-white transition"><i class="fab fa-twitter text-xl"></i></a>
-        </div>
+        <div class="mb-4 md:mb-0"><div class="flex items-center space-x-2"><i class="fas fa-route text-2xl text-blue-400"></i><span class="text-xl font-bold">Road Trip 2025</span></div><p class="text-gray-400 mt-2">Bydgoszcz to Italy • 11-21 September 2025</p></div>
+        <div class="flex space-x-6"><a href="#" class="text-gray-400 hover:text-white transition"><i class="fab fa-facebook-f text-xl"></i></a><a href="#" class="text-gray-400 hover:text-white transition"><i class="fab fa-instagram text-xl"></i></a><a href="#" class="text-gray-400 hover:text-white transition"><i class="fab fa-twitter text-xl"></i></a></div>
       </div>
-      <div class="border-t border-gray-700 mt-8 pt-8 text-center text-gray-400">
-        <p>Created with ❤️ for our unforgettable road trip adventure</p>
-        <p class="mt-2 text-sm">© 2025 Road Trip Crew. All rights reserved.</p>
-      </div>
+      <div class="border-t border-gray-700 mt-8 pt-8 text-center text-gray-400"><p>Created with ❤️ for our unforgettable road trip adventure</p><p class="mt-2 text-sm">© 2025 Road Trip Crew. All rights reserved.</p></div>
     </div>
   </footer>
+
+  <!-- Lightweight alerts -->
+  <div id="appAlerts" class="hidden fixed top-4 left-1/2 -translate-x-1/2 z-[100]">
+    <div class="bg-red-600 text-white px-4 py-2 rounded-lg shadow-lg text-sm" id="appAlertsMsg"></div>
+  </div>
 
   <script>
     // ===== Mobile menu toggle =====
@@ -544,7 +481,6 @@
     setInterval(updateCountdown, 1000);
 
     // ===== MAP + ITINERARY SYNC =====
-    // Core waypoints (approximate coordinates)
     const WAYPOINTS = [
       { day: 1, title: 'Bydgoszcz → Vienna', city: 'Vienna',        lat: 48.2082, lng: 16.3738,   note: 'Arrival and evening walk' },
       { day: 2, title: 'Vienna Exploration → Klagenfurt/Villach',   city: 'Klagenfurt',   lat: 46.6247, lng: 14.3053, note: 'Overnight near A2' },
@@ -559,57 +495,34 @@
       { day:11, title: 'Austria → Bydgoszcz',                       city: 'Bydgoszcz',    lat: 53.1235, lng: 18.0084, note: 'Home' }
     ];
 
-    // Create Leaflet map
     let map, markers = [], routeLine;
     function initMap() {
       map = L.map('map', { zoomSnap: 0.25, scrollWheelZoom: true });
-      const tiles = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        maxZoom: 19,
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> contributors'
-      }).addTo(map);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '&copy; OSM contributors' }).addTo(map);
 
-      // Create markers
-      WAYPOINTS.forEach((wp, i) => {
+      WAYPOINTS.forEach((wp) => {
         const isStop = ![1,5,8,11].includes(wp.day) ? 'marker-stop' : 'marker-day';
-        const icon = L.divIcon({
-          className: 'leaflet-div-icon',
-          html: `<div class="marker-dot ${isStop}">${wp.day}</div>`,
-          iconSize: [30, 30],
-          iconAnchor: [15, 15]
-        });
+        const icon = L.divIcon({ className: 'leaflet-div-icon', html: `<div class="marker-dot ${isStop}">${wp.day}</div>`, iconSize: [30,30], iconAnchor: [15,15] });
         const m = L.marker([wp.lat, wp.lng], { icon }).addTo(map);
         m.bindPopup(`<strong>Day ${wp.day}</strong><br>${wp.title}<br><em>${wp.city}</em><br>${wp.note}`);
-        m._day = wp.day; // custom ref
-        markers.push(m);
+        m._day = wp.day; markers.push(m);
       });
 
-      // Draw polyline (ordered by days)
       const latlngs = WAYPOINTS.map(w => [w.lat, w.lng]);
       routeLine = L.polyline(latlngs, { weight: 5, opacity: 0.7 }).addTo(map);
-      map.fitBounds(routeLine.getBounds(), { padding: [20, 20] });
+      map.fitBounds(routeLine.getBounds(), { padding: [20,20] });
 
-      // Create a control with total distance estimate (straight-line)
-      const km = (function(){
-        let d = 0; for (let i=1;i<latlngs.length;i++){ d += haversine(latlngs[i-1], latlngs[i]); } return Math.round(d);
-      })();
+      const km = (function(){ let d=0; for(let i=1;i<latlngs.length;i++){ d += haversine(latlngs[i-1], latlngs[i]); } return Math.round(d); })();
       const info = L.control({ position: 'bottomleft' });
-      info.onAdd = function(){
-        const div = L.DomUtil.create('div', 'bg-white/90 rounded-lg shadow p-2 text-sm');
-        div.innerHTML = `<i class="fas fa-road mr-1 text-blue-600"></i>Approx route length (as-the-crow-flies): <strong>${km} km</strong>`;
-        return div;
-      };
+      info.onAdd = function(){ const div = L.DomUtil.create('div', 'bg-white/90 rounded-lg shadow p-2 text-sm'); div.innerHTML = `<i class="fas fa-road mr-1 text-blue-600"></i>Approx route length: <strong>${km} km</strong>`; return div; };
       info.addTo(map);
 
-      // Sync timeline ↔ map
       bindTimelineInteractions();
     }
 
-    // Haversine distance in km
     function haversine(a, b) {
-      const toRad = x => x * Math.PI / 180;
-      const [lat1, lon1] = a; const [lat2, lon2] = b;
-      const R = 6371; // km
-      const dLat = toRad(lat2-lat1); const dLon = toRad(lon2-lon1);
+      const toRad = x => x * Math.PI / 180; const [lat1, lon1] = a; const [lat2, lon2] = b; const R = 6371;
+      const dLat = toRad(lat2-lat1), dLon = toRad(lon2-lon1);
       const s1 = Math.sin(dLat/2)**2 + Math.cos(toRad(lat1))*Math.cos(toRad(lat2))*Math.sin(dLon/2)**2;
       return 2 * R * Math.asin(Math.sqrt(s1));
     }
@@ -630,39 +543,24 @@
       if(!m) return;
       routeLine.setStyle({ weight: 6.5, opacity: 0.95 });
       const latlng = m.getLatLng();
-      map.panTo(latlng, { animate: true, duration: opts.smooth ? 0.6 : 0.3 });
+      map.panTo(latlng, { animate: true });
       if(opts.openPopup) { m.openPopup(); }
-      // highlight timeline item
       document.querySelectorAll('.trip-day').forEach(el => el.classList.remove('ring-2','ring-blue-400'));
       const el = document.querySelector(`.trip-day[data-day="${day}"]`);
       if(el) el.classList.add('ring-2','ring-blue-400');
     }
 
-    // ===== Show more days =====
+    // Show more days
     const showMoreBtn = document.getElementById('showMoreDays');
     const extra = document.getElementById('extraDays');
     showMoreBtn.addEventListener('click', () => {
       extra.classList.toggle('timeline-hidden');
       showMoreBtn.textContent = extra.classList.contains('timeline-hidden') ? 'Show Full Itinerary' : 'Hide Full Itinerary';
-      // After revealing, re-bind interactions (new nodes present)
       bindTimelineInteractions();
+      ensureGalleries();
     });
 
-    // ===== Initialize map when page loads =====
-    window.addEventListener('load', async () => {
-      // Ensure Leaflet is available; try a fallback CDN if not
-      if (typeof window.L === 'undefined') {
-        await loadScript('https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js');
-        const css = document.createElement('link');
-        css.rel='stylesheet'; css.href='https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css';
-        document.head.appendChild(css);
-      }
-      try { initMap(); initMiniMap(); } catch (e) { alertUser('Map failed to load. Try refreshing, or check your network/CSP.'); }
-      try { initComments(); } catch(e) { console.warn(e); }
-      try { addWeatherButtons(); } catch(e) { console.warn(e); }
-    });
-
-    // ===== MINI MAP (sticky) =====
+    // ===== MINI MAP =====
     let miniMap, miniRoute, miniMarkerRefs = [];
     function initMiniMap(){
       miniMap = L.map('miniMap', { zoomControl:false, attributionControl:false, dragging:true, scrollWheelZoom:false });
@@ -674,88 +572,49 @@
         const icon = L.divIcon({ className:'leaflet-div-icon', html:`<div class='marker-dot marker-day' style='transform:scale(.7)'>${wp.day}</div>`, iconSize:[22,22], iconAnchor:[11,11] });
         const m = L.marker([wp.lat, wp.lng], { icon }).addTo(miniMap); miniMarkerRefs.push(m);
       });
-      // Highlight current day when focused
       const origFocus = focusDay;
-      window.focusDay = function(day, opts){
-        origFocus(day, opts);
-        const m = miniMarkerRefs[day-1]; if(!m) return;
-        miniMap.panTo(m.getLatLng(), { animate:true });
-        // brief pulse
-        const el = document.querySelector(`#miniMap .marker-dot:nth-child(${day})`);
-      }
+      window.focusDay = function(day, opts){ origFocus(day, opts); const m = miniMarkerRefs[day-1]; if(m) miniMap.panTo(m.getLatLng(), { animate:true }); };
     }
 
     // ===== DAY GALLERIES =====
     const DAY_PHOTOS = {
-      1: [
-        'https://images.unsplash.com/photo-1543357480-c60d40007a8d?auto=format&fit=crop&w=800&q=60',
-        'https://images.unsplash.com/photo-1555169062-013468b47731?auto=format&fit=crop&w=800&q=60'
-      ],
-      3: [
-        'https://images.unsplash.com/photo-1533105079780-92b9be482077?auto=format&fit=crop&w=800&q=60',
-        'https://images.unsplash.com/photo-1504196606672-aef5c9cefc92?auto=format&fit=crop&w=800&q=60'
-      ],
-      4: [
-        'https://images.unsplash.com/photo-1509023464722-18d996393ca8?auto=format&fit=crop&w=800&q=60',
-        'https://images.unsplash.com/photo-1464790719320-516ecd75af6c?auto=format&fit=crop&w=800&q=60'
-      ],
-      5: [
-        'https://images.unsplash.com/photo-1543348750-466b55f32f34?auto=format&fit=crop&w=800&q=60',
-        'https://images.unsplash.com/photo-1526129318478-62ed807ebdf9?auto=format&fit=crop&w=800&q=60'
-      ],
-      8: [
-        'https://images.unsplash.com/photo-1467269204594-9661b134dd2b?auto=format&fit=crop&w=800&q=60',
-        'https://images.unsplash.com/photo-1528909514045-2fa4ac7a08ba?auto=format&fit=crop&w=800&q=60'
-      ],
-      9: [
-        'https://images.unsplash.com/photo-1512453979798-5ea266f8880c?auto=format&fit=crop&w=800&q=60',
-        'https://images.unsplash.com/photo-1545134969-8debd725b007?auto=format&fit=crop&w=800&q=60'
-      ]
+      1: ['https://images.unsplash.com/photo-1543357480-c60d40007a8d?auto=format&fit=crop&w=800&q=60','https://images.unsplash.com/photo-1555169062-013468b47731?auto=format&fit=crop&w=800&q=60'],
+      3: ['https://images.unsplash.com/photo-1533105079780-92b9be482077?auto=format&fit=crop&w=800&q=60','https://images.unsplash.com/photo-1504196606672-aef5c9cefc92?auto=format&fit=crop&w=800&q=60'],
+      4: ['https://images.unsplash.com/photo-1509023464722-18d996393ca8?auto=format&fit=crop&w=800&q=60','https://images.unsplash.com/photo-1464790719320-516ecd75af6c?auto=format&fit=crop&w=800&q=60'],
+      5: ['https://images.unsplash.com/photo-1543348750-466b55f32f34?auto=format&fit=crop&w=800&q=60','https://images.unsplash.com/photo-1526129318478-62ed807ebdf9?auto=format&fit=crop&w=800&q=60'],
+      8: ['https://images.unsplash.com/photo-1467269204594-9661b134dd2b?auto=format&fit=crop&w=800&q=60','https://images.unsplash.com/photo-1528909514045-2fa4ac7a08ba?auto=format&fit=crop&w=800&q=60'],
+      9: ['https://images.unsplash.com/photo-1512453979798-5ea266f8880c?auto=format&fit=crop&w=800&q=60','https://images.unsplash.com/photo-1545134969-8debd725b007?auto=format&fit=crop&w=800&q=60']
     };
 
     function ensureGalleries(){
       document.querySelectorAll('.trip-day').forEach(dayEl => {
         const day = Number(dayEl.dataset.day);
         if(!DAY_PHOTOS[day]) return;
-        if(dayEl.querySelector('.photo-strip')) return; // already
-        const container = document.createElement('div');
-        container.className = 'photo-strip';
-        DAY_PHOTOS[day].forEach(url => {
-          const img = document.createElement('img'); img.loading = 'lazy'; img.src = url; img.alt = 'Photo';
-          container.appendChild(img);
-        });
+        if(dayEl.querySelector('.photo-strip')) return;
+        const container = document.createElement('div'); container.className = 'photo-strip';
+        DAY_PHOTOS[day].forEach(url => { const img = document.createElement('img'); img.loading='lazy'; img.src=url; img.alt='Photo'; container.appendChild(img); });
         const card = dayEl.querySelector('.bg-white');
         const toggler = document.createElement('button');
         toggler.className = 'mt-3 text-sm text-blue-600 hover:text-blue-800 font-medium';
         toggler.innerHTML = '<i class="fas fa-images mr-1"></i> Show photos';
         let visible = false;
-        toggler.addEventListener('click', () => {
-          visible = !visible; toggler.textContent = visible ? 'Hide photos' : 'Show photos';
-          container.style.display = visible ? 'flex' : 'none';
-        });
-        container.style.display = 'none';
-        card.appendChild(toggler);
-        card.appendChild(container);
+        toggler.addEventListener('click', () => { visible = !visible; toggler.textContent = visible ? 'Hide photos' : 'Show photos'; container.style.display = visible ? 'flex' : 'none'; });
+        container.style.display = 'none'; card.appendChild(toggler); card.appendChild(container);
+
+        // Weather button for quick access
+        const header = card.querySelector('.flex.justify-between');
+        if(header && !card.querySelector('.weather-btn')){
+          const btn = document.createElement('button');
+          btn.className = 'weather-btn ml-2 inline-flex items-center text-xs px-2 py-1 rounded bg-blue-50 text-blue-700 hover:bg-blue-100';
+          btn.innerHTML = '<i class="fas fa-cloud-sun mr-1"></i> Weather';
+          btn.addEventListener('click', (e)=>{ e.stopPropagation(); focusDay(day, { openPopup:false }); });
+          header.appendChild(btn);
+        }
       });
     }
     ensureGalleries();
 
-    // Add small weather buttons to each day card (for mobile visibility)
-    function addWeatherButtons(){
-      document.querySelectorAll('.trip-day').forEach(dayEl => {
-        const day = Number(dayEl.dataset.day);
-        const card = dayEl.querySelector('.bg-white');
-        if (!card || card.querySelector('.weather-btn')) return;
-        const btn = document.createElement('button');
-        btn.className = 'weather-btn ml-2 inline-flex items-center text-xs px-2 py-1 rounded bg-blue-50 text-blue-700 hover:bg-blue-100';
-        btn.innerHTML = '<i class="fas fa-cloud-sun mr-1"></i> Weather';
-        btn.addEventListener('click', (e)=>{ e.stopPropagation(); focusDay(day, { openPopup:false }); });
-        const header = card.querySelector('.flex.justify-between');
-        if(header){ header.appendChild(btn);} else { card.prepend(btn); }
-      });
-    }
-
-    // ===== WEATHER (Open‑Meteo, no API key) =====
+    // ===== WEATHER (Open‑Meteo) =====
     const weatherBox = document.getElementById('weatherBox');
     const weatherTitle = document.getElementById('weatherTitle');
     const weatherContent = document.getElementById('weatherContent');
@@ -770,79 +629,18 @@
         const url = `https://api.open-meteo.com/v1/forecast?latitude=${wp.lat}&longitude=${wp.lng}&daily=weathercode,temperature_2m_max,temperature_2m_min&timezone=auto`;
         const res = await fetch(url);
         const data = await res.json();
-        const days = data.daily.time.map((d,i)=>({
-          date: d,
-          tmax: Math.round(data.daily.temperature_2m_max[i]),
-          tmin: Math.round(data.daily.temperature_2m_min[i]),
-          code: data.daily.weathercode[i]
-        })).slice(0,7);
-        const rows = days.map(x=>`<div class='flex justify-between py-1 border-b last:border-b-0'>
-          <span>${x.date}</span><span class='font-medium'>${x.tmin}° / ${x.tmax}°C</span>
-        </div>`).join('');
+        const days = data.daily.time.map((d,i)=>({ date: d, tmax: Math.round(data.daily.temperature_2m_max[i]), tmin: Math.round(data.daily.temperature_2m_min[i]), code: data.daily.weathercode[i] })).slice(0,7);
+        const rows = days.map(x=>`<div class='flex justify-between py-1 border-b last:border-b-0'><span>${x.date}</span><span class='font-medium'>${x.tmin}° / ${x.tmax}°C</span></div>`).join('');
         weatherContent.innerHTML = `<div class='text-xs text-gray-500 mb-1'>7‑day forecast (from today)</div>${rows}`;
-      }catch(e){
-        weatherContent.textContent = 'Could not load weather right now.';
-      }
+      }catch(e){ weatherContent.textContent = 'Could not load weather right now.'; }
     }
 
-    // Hook weather into focusDay (without breaking its behavior)
     const _origFocusDay = focusDay;
-    focusDay = function(day, opts){
-      _origFocusDay(day, opts);
-      fetchWeatherForDay(day);
-    }
+    focusDay = function(day, opts){ _origFocusDay(day, opts); fetchWeatherForDay(day); };
 
-    // ===== COMMENTS (localStorage) =====
-    function initComments(){
-      const key = 'tripComments_v1';
-      const list = document.getElementById('cList');
-      const name = document.getElementById('cName');
-      const place = document.getElementById('cPlace');
-      const text = document.getElementById('cText');
-      const submit = document.getElementById('cSubmit');
-      const read = () => JSON.parse(localStorage.getItem(key) || '[]');
-      const write = arr => localStorage.setItem(key, JSON.stringify(arr));
-
-      function render(){
-        const items = read();
-        if(!items.length){ list.innerHTML = '<p class="text-gray-500 text-center">No comments yet. Be the first to share a tip! ✨</p>'; return; }
-        list.innerHTML = items.map((c,i)=>`
-          <div class='comment-card'>
-            <div class='flex justify-between items-center'>
-              <div class='font-semibold text-gray-800'>${escapeHtml(c.name || 'Guest')}</div>
-              <div class='text-xs text-gray-400'>${new Date(c.time).toLocaleString()}</div>
-            </div>
-            <div class='text-gray-600 mt-2'>${escapeHtml(c.text)}</div>
-            ${c.place ? `<div class='mt-2 text-sm text-blue-600'><i class="fas fa-location-dot mr-1"></i>${escapeHtml(c.place)}</div>` : ''}
-            <div class='mt-3 text-right'>
-              <button data-i='${i}' class='delComment text-xs text-red-600 hover:text-red-700'>Delete</button>
-            </div>
-          </div>
-        `).join('');
-        list.querySelectorAll('.delComment').forEach(btn=> btn.addEventListener('click', (e)=>{
-          const i = Number(e.target.getAttribute('data-i')); const arr = read(); arr.splice(i,1); write(arr); render();
-        }));
-      }
-
-      submit.addEventListener('click', ()=>{
-        if(!text.value.trim()) { text.focus(); return; }
-        const arr = read();
-        arr.unshift({ name: name.value.trim(), place: place.value.trim(), text: text.value.trim(), time: Date.now() });
-        write(arr);
-        name.value = ''; place.value=''; text.value='';
-        render();
-      });
-      render();
-    }
-
-    function escapeHtml(s){ return (s||'').replace(/[&<>"]/g, c=> ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]) ); }
-
-    // ===== PDF EXPORT (simplified itinerary) =====
+    // ===== PDF EXPORT =====
     document.getElementById('downloadPdf').addEventListener('click', async ()=>{
-      if (!window.jspdf) {
-        // Fallback loader if CDN blocked on first pass
-        await loadScript('https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js');
-      }
+      if (!window.jspdf) { await loadScript('https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js'); }
       if (!window.jspdf) { return alertUser('PDF module failed to load. Are external CDNs blocked?'); }
       const { jsPDF } = window.jspdf;
       const doc = new jsPDF({ unit: 'pt', format: 'a4' });
@@ -852,27 +650,25 @@
       doc.setFont('helvetica',''); doc.setFontSize(12);
       doc.text('Dates: 11–21 September 2025', margin, y); y += 10;
       doc.text('Route: Bydgoszcz → Vienna → Lake Garda → Florence → Pisa → Venice → Bydgoszcz', margin, y); y += 20;
-      WAYPOINTS.forEach(wp => {
-        if(y > 780){ doc.addPage(); y = margin; }
-        doc.setFont('helvetica','bold'); doc.text(`Day ${wp.day}: ${wp.title}`, margin, y); y += 14;
-        doc.setFont('helvetica',''); doc.text(`Stop: ${wp.city} — ${wp.note}`, margin, y); y += 18;
-      });
+      WAYPOINTS.forEach(wp => { if(y > 780){ doc.addPage(); y = margin; } doc.setFont('helvetica','bold'); doc.text(`Day ${wp.day}: ${wp.title}`, margin, y); y += 14; doc.setFont('helvetica',''); doc.text(`Stop: ${wp.city} — ${wp.note}`, margin, y); y += 18; });
       doc.save('RoadTrip2025-Itinerary.pdf');
     });
+
+    // ===== Initialize on load with fallbacks =====
+    window.addEventListener('load', async () => {
+      if (typeof window.L === 'undefined') {
+        await loadScript('https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js');
+        const css = document.createElement('link'); css.rel='stylesheet'; css.href='https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css'; document.head.appendChild(css);
+      }
+      try { initMap(); initMiniMap(); } catch (e) { alertUser('Map failed to load. Try refreshing, or check your network/CSP.'); }
+      try { ensureGalleries(); } catch(e) { console.warn(e); }
+    });
+
     // ===== Utilities =====
     function loadScript(src){
-      return new Promise((resolve, reject)=>{
-        const s = document.createElement('script'); s.src = src; s.async = true;
-        s.onload = ()=> resolve(); s.onerror = ()=> reject(new Error('Failed to load '+src));
-        document.head.appendChild(s);
-      });
+      return new Promise((resolve, reject)=>{ const s = document.createElement('script'); s.src = src; s.async = true; s.onload = ()=> resolve(); s.onerror = ()=> reject(new Error('Failed to load '+src)); document.head.appendChild(s); });
     }
-    function alertUser(msg){
-      const box = document.getElementById('appAlerts'); const msgEl = document.getElementById('appAlertsMsg');
-      if(!box || !msgEl){ alert(msg); return; }
-      msgEl.textContent = msg; box.classList.remove('hidden');
-      setTimeout(()=> box.classList.add('hidden'), 4000);
-    }
+    function alertUser(msg){ const box = document.getElementById('appAlerts'); const msgEl = document.getElementById('appAlertsMsg'); if(!box || !msgEl){ alert(msg); return; } msgEl.textContent = msg; box.classList.remove('hidden'); setTimeout(()=> box.classList.add('hidden'), 4000); }
   </script>
 </body>
 </html>
