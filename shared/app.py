@@ -2,6 +2,7 @@
 import copy, datetime as dt, hashlib, hmac, html, json, os, re, secrets, threading, time
 from collections import defaultdict, deque
 from pathlib import Path
+from urllib.parse import urlsplit
 from flask import Flask, request, session, redirect, jsonify, make_response, Response
 from werkzeug.middleware.proxy_fix import ProxyFix
 import psycopg
@@ -61,6 +62,30 @@ def csrf():
  if 'csrf' not in session:session['csrf']=secrets.token_urlsafe(32)
  return session['csrf']
 
+def normalized_origin(value):
+ """An exact scheme/host/port, never a suffix match or a forwarded header."""
+ if not isinstance(value,str) or not value or len(value)>2048:return None
+ if any(c.isspace() or ord(c)<32 or ord(c)==127 for c in value):return None
+ try:
+  parts=urlsplit(value)
+  if parts.scheme not in ('http','https') or not parts.hostname:return None
+  if parts.username is not None or parts.password is not None:return None
+  if parts.path not in ('','/') or parts.query or parts.fragment:return None
+  port=parts.port
+  if port is None:port=443 if parts.scheme=='https' else 80
+  return parts.scheme,parts.hostname.lower(),port
+ except (ValueError,TypeError):return None
+
+def allowed_origin(value):
+ # Render's internal Host/scheme need not match the public browser URL.
+ # Trust only a deployment setting, not X-Forwarded-Host from a request.
+ expected=os.environ.get('PUBLIC_ORIGIN') or os.environ.get('RENDER_EXTERNAL_URL')
+ if not expected:
+  if os.environ.get('RENDER')=='true':return False
+  expected=request.host_url
+ actual=normalized_origin(value)
+ return actual is not None and actual==normalized_origin(expected)
+
 def valid_day(value,nullable=True):
  if value in ('',None):
   if nullable:return
@@ -99,7 +124,7 @@ def guard():
   token=request.headers.get('X-CSRF-Token') or request.form.get('csrf','')
   if not token or not str(token).isascii() or not hmac.compare_digest(str(token),str(session.get('csrf',''))):return jsonify(error='Sesja wygasła. Odśwież stronę i zaloguj się ponownie.'),403
   origin=request.headers.get('Origin')
-  if origin and origin.rstrip('/')!=request.host_url.rstrip('/'):return jsonify(error='Nieprawidłowe źródło żądania.'),403
+  if origin is not None and not allowed_origin(origin):return jsonify(error='Nieprawidłowe źródło żądania. Odśwież stronę logowania i spróbuj ponownie.'),403
  if request.path!='/login' and session.get('user') not in PEOPLE:
   if request.path.startswith('/api/'):return jsonify(error='Zaloguj się ponownie.'),401
   return redirect('/login')
@@ -109,7 +134,9 @@ def secure(response):
  response.headers['Cache-Control']='private, no-store'
  response.headers['X-Content-Type-Options']='nosniff'
  response.headers['X-Frame-Options']='DENY'
- response.headers['Referrer-Policy']='no-referrer'
+ # no-referrer makes browsers send Origin:null on ordinary form POSTs.
+ # same-origin keeps the login origin and still sends no Referer externally.
+ response.headers['Referrer-Policy']='same-origin'
  response.headers['X-Robots-Tag']='noindex, nofollow, noarchive'
  response.headers['Content-Security-Policy']="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self'; object-src 'none'; frame-ancestors 'none'; base-uri 'none'; form-action 'self'"
  if os.environ.get('LOCAL_TEST')!='1':response.headers['Strict-Transport-Security']='max-age=31536000'
