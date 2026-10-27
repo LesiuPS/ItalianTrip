@@ -35,9 +35,8 @@ def configure():
 
 configure()
 if __name__ == '__main__':
-    # Import the test module explicitly. runpy with unittest.main() discovered
-    # this bootstrap module instead of the actual tests on Python 3.14.
-    # The tests use an isolated transactional adapter, never the live database.
+    # Explicit loading avoids runpy/unittest's incorrect __main__ discovery.
+    # Build tests never use the live database.
     import unittest
     from . import test_app
     suite = unittest.defaultTestLoader.loadTestsFromModule(test_app)
@@ -46,4 +45,9 @@ if __name__ == '__main__':
     result = unittest.TextTestRunner(verbosity=2).run(suite)
     raise SystemExit(0 if result.wasSuccessful() else 1)
 else:
-    from .app import app
+    from . import app as app_module
+    from .livecheck import verify
+    # Startup runs before accepting traffic. Only a disposable schema is written
+    # during the two-session check; real user expense records remain untouched.
+    verify(app_module)
+    app = app_module.app
