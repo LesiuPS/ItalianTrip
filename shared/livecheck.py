@@ -5,6 +5,8 @@ initialized first. Real API writes are exercised with independent sessions and
 connections inside a private test schema, which is removed in finally.
 """
 import copy
+import os
+import re
 import secrets
 from psycopg import sql
 
@@ -33,7 +35,29 @@ def verify(module):
 
         module.connect = isolated_connect
         module._initialized = False
-        root = 'https://localhost'
+        root = (os.environ.get('PUBLIC_ORIGIN') or os.environ.get('RENDER_EXTERNAL_URL') or 'https://localhost').rstrip('/')
+
+        def require(condition, message):
+            if not condition:
+                raise RuntimeError('Live database check failed: ' + message)
+
+        # Exercise the real login handler with browser-like Origin headers.
+        # The password is deliberately invalid: no production password is changed.
+        anon = module.app.test_client()
+        login_page = anon.get('/login', base_url=root)
+        require(login_page.headers.get('Referrer-Policy') == 'same-origin',
+                'form responses must preserve same-origin POST Origin')
+        login_csrf = re.search(r'name="csrf" value="([^"]+)"', login_page.text).group(1)
+        login_response = anon.post('/login', base_url=root,
+            data={'user': 'Leszek', 'password': 'invalid-smoke-' + secrets.token_urlsafe(24), 'csrf': login_csrf},
+            headers={'Origin': root, 'Sec-Fetch-Site': 'same-origin'})
+        require(login_response.status_code == 200 and 'Nieprawidłowy użytkownik lub hasło.' in login_response.text,
+                'same-origin login must reach password validation, not an Origin rejection')
+        require(anon.post('/login', base_url=root,
+            data={'user': 'Leszek', 'password': 'unused', 'csrf': login_csrf},
+            headers={'Origin': 'https://untrusted.example'}).status_code == 403,
+                'cross-origin login must still be rejected')
+
         leszek, karolina = module.app.test_client(), module.app.test_client()
         tokens = {}
         for client, user in ((leszek, 'Leszek'), (karolina, 'Karolina')):
@@ -42,10 +66,6 @@ def verify(module):
             with client.session_transaction(base_url=root) as session:
                 session['user'] = user
                 session['csrf'] = token
-
-        def require(condition, message):
-            if not condition:
-                raise RuntimeError('Live database check failed: ' + message)
 
         def post(client, user, operation, changes):
             return client.post('/api/changes', base_url=root,
@@ -109,7 +129,8 @@ def verify(module):
     restored = module.load_state()
     if restored['tripId'] != production['tripId']:
         raise RuntimeError('Production database context was not restored')
-    print('TRIP LIVE CHECK PASS: PostgreSQL read/write; two independent authenticated sessions; '
+    print('TRIP LIVE CHECK PASS: browser Origin accepted; unsafe Origin rejected; '
+          'same-origin Referrer-Policy; PostgreSQL read/write; two independent authenticated sessions; '
           'cross-session edits and notes; conflict rejection; idempotent retry; '
           'persistence after reinitialization; export. Disposable test schema removed. '
           'User expense rows were not modified.', flush=True)
