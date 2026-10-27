@@ -1,4 +1,4 @@
-"""Load private deployment data from one Render environment value, never Git."""
+"""Load private deployment data from Render, with optional password-only overrides."""
 import json
 import os
 import re
@@ -21,16 +21,20 @@ def configure():
             raise ValueError()
         if not seed['expenses'] or not plan['plan']:
             raise ValueError()
+        effective_passwords = {}
         for name in ('Leszek', 'Karolina'):
-            value = passwords[name]
+            # A password change must not replace PRIVATE_CONFIG or travel data.
+            # Overrides contain salted hashes only, never plaintext passwords.
+            value = os.environ.get('PASSWORD_' + name.upper() + '_OVERRIDE', passwords[name])
             if not isinstance(value, str) or not re.fullmatch(r'[a-f0-9]{32}:[a-f0-9]{64}', value):
                 raise ValueError()
+            effective_passwords[name] = value
     except (ValueError, TypeError, KeyError):
-        raise RuntimeError('PRIVATE_CONFIG is incomplete or invalid. Copy the complete JSON configuration.') from None
+        raise RuntimeError('PRIVATE_CONFIG or a password override is incomplete or invalid.') from None
     os.environ['TRIP_SEED'] = json.dumps(seed, ensure_ascii=False)
     os.environ['TRIP_PLAN'] = json.dumps(plan, ensure_ascii=False)
     for name in ('Leszek', 'Karolina'):
-        os.environ['PASSWORD_' + name.upper()] = passwords[name]
+        os.environ['PASSWORD_' + name.upper()] = effective_passwords[name]
 
 
 configure()
