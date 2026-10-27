@@ -1,5 +1,6 @@
 """Run during build. Uses a transactional memory adapter, never the live database."""
 import copy, hashlib, os, re, unittest
+from unittest.mock import patch
 os.environ['LOCAL_TEST']='1'
 from shared import app as m
 
@@ -27,6 +28,7 @@ class Memory:
 class TestSharedPlanner(unittest.TestCase):
     def setUp(self):
         m._initialized=False;self.db=Memory();m.connect=self.db
+        m._attempts.clear()
         m.app.config.update(TESTING=True,SESSION_COOKIE_SECURE=False)
         salt='ab'*16
         for name in m.PEOPLE:os.environ['PASSWORD_'+name.upper()]=salt+':'+hashlib.pbkdf2_hmac('sha256',b'test-password-only',bytes.fromhex(salt),600000).hex()
@@ -71,5 +73,56 @@ class TestSharedPlanner(unittest.TestCase):
         r=self.l.get('/api/offline');self.assertEqual(r.status_code,200)
         self.assertIn('attachment',r.headers['Content-Disposition']);self.assertNotIn('cloud-config',r.text)
         self.assertNotIn(self.csrf[id(self.l)],r.text)
+    def test_form_keeps_origin_without_leaking_external_referrer(self):
+        response=m.app.test_client().get('/login')
+        self.assertEqual(response.headers['Referrer-Policy'],'same-origin')
+        self.assertIn("form-action 'self'",response.headers['Content-Security-Policy'])
+        self.assertIn('name="csrf"',response.text)
+    def test_both_logins_behind_internal_http_proxy(self):
+        public='https://planner.example.test'
+        # Browser sees HTTPS, while the trusted proxy forwards an internal host.
+        internal='http://private-service:10000'
+        with patch.dict(os.environ,{'PUBLIC_ORIGIN':public,'RENDER':'true'}):
+            for name in m.PEOPLE:
+                with self.subTest(user=name):
+                    c=m.app.test_client()
+                    response=c.get('/login',base_url=internal)
+                    token=re.search(r'name="csrf" value="([^"]+)"',response.text).group(1)
+                    response=c.post('/login',base_url=internal,data={'user':name,'password':'test-password-only','csrf':token},headers={'Origin':public,'X-Forwarded-Proto':'http','X-Forwarded-Host':'private-service:10000'})
+                    self.assertEqual(response.status_code,302,response.text)
+                    self.assertEqual(response.headers['Location'],'/')
+                    page=c.get('/',base_url=internal)
+                    self.assertEqual(page.status_code,200)
+                    self.assertIn(name,page.text)
+    def test_same_origin_api_write_and_sync(self):
+        public='https://planner.example.test'
+        with patch.dict(os.environ,{'PUBLIC_ORIGIN':public}):
+            response=self.l.post('/api/changes',json={'operation':'origin-save-one','changes':[self.addition('origin-test-record')]},headers={'Origin':public,'X-CSRF-Token':self.csrf[id(self.l)]})
+            self.assertEqual(response.status_code,200,response.text)
+            state=self.k.get('/api/state').json['state']
+            self.assertEqual(next(x for x in state['expenses'] if x['id']=='origin-test-record')['createdBy'],'Leszek')
+    def test_foreign_null_and_spoofed_origins_still_rejected(self):
+        public='https://planner.example.test'
+        with patch.dict(os.environ,{'PUBLIC_ORIGIN':public}):
+            for origin in ('null','https://attacker.example','http://planner.example.test','https://planner.example.test.attacker.example','https://planner.example.test@attacker.example','https://planner.example.test:444','https://planner.example.test/path','https://planner.example.test, https://attacker.example',''):
+                with self.subTest(origin=origin):
+                    response=self.l.post('/api/changes',json={},headers={'Origin':origin,'X-CSRF-Token':self.csrf[id(self.l)],'X-Forwarded-Host':'attacker.example','X-Forwarded-Proto':'https'})
+                    self.assertEqual(response.status_code,403)
+    def test_same_origin_still_requires_csrf(self):
+        public='https://planner.example.test'
+        with patch.dict(os.environ,{'PUBLIC_ORIGIN':public}):
+            for token in ('','bad-token'):
+                response=self.l.post('/api/changes',json={},headers={'Origin':public,'X-CSRF-Token':token})
+                self.assertEqual(response.status_code,403)
+    def test_origin_normalization_and_render_setting(self):
+        with patch.dict(os.environ,{'PUBLIC_ORIGIN':'','RENDER_EXTERNAL_URL':'https://Planner.Example.test/','RENDER':'true'}):
+            with m.app.test_request_context('/',base_url='http://internal-host:10000'):
+                self.assertTrue(m.allowed_origin('https://planner.example.test'))
+                self.assertTrue(m.allowed_origin('https://planner.example.test:443'))
+                self.assertFalse(m.allowed_origin('http://internal-host:10000'))
+                self.assertFalse(m.allowed_origin('null'))
+        with patch.dict(os.environ,{'PUBLIC_ORIGIN':'','RENDER_EXTERNAL_URL':'','RENDER':'true'}):
+            with m.app.test_request_context('/'):
+                self.assertFalse(m.allowed_origin('http://localhost'))
 
 if __name__=='__main__':unittest.main()
