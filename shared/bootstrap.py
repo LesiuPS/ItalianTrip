@@ -2,7 +2,6 @@
 import json
 import os
 import re
-import runpy
 
 
 def configure():
@@ -36,7 +35,15 @@ def configure():
 
 configure()
 if __name__ == '__main__':
-    # Build tests use an isolated transactional adapter, not the live database.
-    runpy.run_module('shared.test_app', run_name='__main__')
+    # Import the test module explicitly. runpy with unittest.main() discovered
+    # this bootstrap module instead of the actual tests on Python 3.14.
+    # The tests use an isolated transactional adapter, never the live database.
+    import unittest
+    from . import test_app
+    suite = unittest.defaultTestLoader.loadTestsFromModule(test_app)
+    if suite.countTestCases() == 0:
+        raise RuntimeError('Build validation found no tests; refusing deployment.')
+    result = unittest.TextTestRunner(verbosity=2).run(suite)
+    raise SystemExit(0 if result.wasSuccessful() else 1)
 else:
     from .app import app
